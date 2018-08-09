@@ -31,6 +31,8 @@ var scrollAmount = 5;//How many squares to scroll when pressing WASD
 var img = [];//Tile Image Array
 var mapTiles = [];//Map Tiles Array
 
+var UI = new tileUI();
+var BG = new BGFunc();
 
 function preload(){
 	img[tileBorderNumber] = loadImage('assets/Border.png');//Border for Color
@@ -42,57 +44,7 @@ function preload(){
 
 function setup(){
 	createCanvas(cols*scl,rows*scl);//(Width, Height)
-	
-	RSlider = createSlider(0,255,127);//(Min, Max, Start)
-	RSlider.changed(function RSliderC() {RInput.value(this.value());});//The function to run when changed
-	RSlider.style('width', scl*2.8+'px');//Width of slider
-	
-	GSlider = createSlider(0,255,127);//(Min, Max, Start)
-	GSlider.changed(function GSliderC() {GInput.value(this.value());});//The function to run when changed
-	GSlider.style('width', scl*2.8+'px');//Width of slider
-	
-	BSlider = createSlider(0,255,127);//(Min, Max, Start)
-	BSlider.changed(function BSliderC() {BInput.value(this.value());});//The function to run when changed
-	BSlider.style('width', scl*2.8+'px');//Width of slider
-	
-	RInput = createInput(255);//(Start)
-	RInput.input(function RInputC() {RSlider.value(this.value());});//The function to run when changed
-	RInput.style('width', scl+'px');//Width of input box
-	
-	GInput = createInput(255);//(Start)
-	GInput.input(function GInputC() {GSlider.value(this.value());});//The function to run when changed
-	GInput.style('width', scl+'px');//Width of input box
-	
-	BInput = createInput(255);//(Start)
-	BInput.input(function BInputC() {BSlider.value(this.value());});//The function to run when changed
-	BInput.style('width', scl+'px');//Width of input box
-	
-	CCheckBox = createCheckbox('Clear', false);//(Start Unchecked)
-	CCheckBox.changed(function CCheckBoxF() {if(this.checked()){CClear = true;}else{CClear = false;}});//The function to run when changed
-	
-	SaveButton = createButton('Save');//Text of button
-	SaveButton.mousePressed(SaveCanvas);//The function to run when pressed
-	
-	LoadButton = createButton('Load');//Text of button
-	LoadButton.mousePressed(LoadCanvas);//The function to run when pressed
-	
-	DeleteButton = createButton('Delete');//Text of button
-	DeleteButton.mousePressed(DeleteCanvas);//The function to run when pressed
-	
-	ClearButton = createButton('Clear');//Text of button
-	ClearButton.mousePressed(ClearCanvas);//The function to run when pressed
-	
-	FileSaveButton = createButton('Save File');//Text of button
-	FileSaveButton.mousePressed(FileSaveCanvas);//The function to run when pressed
-	
-	//FileLoadButton = createFileInput(FileLoadCanvas);
-	
-	NextButton = createButton('Next');//Text of button
-	NextButton.mousePressed(NextButtonC);//The function to run when pressed
-	
-	PrevButton = createButton('Prev');//Text of button
-	PrevButton.mousePressed(PrevButtonC);//The function to run when pressed
-	
+	UI.setup();
 }//setup() END
 
 function NextButtonC(){
@@ -151,43 +103,29 @@ function ClearCanvas(){
 	mapTiles = [];
 }//ClearCanvas() END
 
-
-function draw(){
+function updateXY(){
 	mX = mouseX;
 	mY = mouseY;
 	pX = window.pageXOffset;
 	pY = window.pageYOffset;
+}
+
+function draw(){
+	updateXY();
 	
-	background(255);
+	BG.draw();
 	
 	window.scrollTo(Math.floor((SX)/scl) * scl, Math.floor((SY)/scl) * scl)
-	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	CCheckBox.position((scl*3)+(scl/2) + pX, scl+(scl/2.2) + pY);
-	SaveButton.position((scl*8.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
-	LoadButton.position((scl*10)+(scl/2) + pX, scl+(scl/2.5) + pY);
-	DeleteButton.position((scl*11.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
-	ClearButton.position((scl*13)+(scl/2) + pX, scl+(scl/2.5) + pY);
-	FileSaveButton.position((scl*14.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
-	//FileLoadButton.position((scl*19.5)+(scl/2) + pX, scl+(scl/2) + pY);
-	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//Draw Grid on Screen
-	for(var i = 0; i < cols + 1; i++){//Draw all the column lines
-		line(scl * i, 0, scl * i, rows*scl);//Draw Verticle lines
-	}
-	for(var i = 0; i < rows + 1; i++){//Draw all the row lines
-		line(0, scl * i, cols*scl, scl * i);//Draw Horizontal Lines
-	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//If dragging a tile: update location
 	if (dragging){//Are we dragging a tile
 		if(mapTiles[mapN] != null){
-			mapTiles[mapN].updateLocation();//Adjust XY location of tile
+			updateTileLocation(mapN);//Adjust XY location of tile
 		}
 	}
-	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	//Display Map Tiles
 	for(var i = 0; i < mapTiles.length; i++){//Loop through all the tiles
 		if(!mapTiles[i].clear){//Is the tile colored
@@ -195,42 +133,16 @@ function draw(){
 			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);//Draw colored square behind tile
 		}
 		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
-		//mapTiles[i].display();
 	}
-	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	RSlider.position(0 + pX, scl+((scl/6)*1) + pY);//Update Red Slider position
-	GSlider.position(0 + pX, scl+((scl/6)*3) + pY);//Update Green Slider position
-	BSlider.position(0 + pX, scl+((scl/6)*5) + pY);//Update Blue Slider position
-	RInput.position((scl*5)+(scl/2) + pX, scl+(scl/2.5) + pY);//Update Red Number Input position
-	GInput.position((scl*6)+(scl/2) + pX, scl+(scl/2.5) + pY);//Update Green Number Input position
-	BInput.position((scl*7)+(scl/2) + pX, scl+(scl/2.5) + pY);//Update Blue Number Input position
-	
-	fill(RSlider.value(),GSlider.value(),BSlider.value());//Set background color to the RGB value set by user
-	rect(0 + pX, scl + pY, scl*3, scl);//Display color behind RGB Sliders
-	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	fill(255);//Set background color to white
-	rect(pX, pY, scl*rowLength, scl);//Create rectangle behind tiles UI
-	for(var i = 0; i < rowLength; i++){//Loop through all the tiles
-		if(rowLength*tileRow+i <= totalImages+1){//If tile exists
-			if(rowLength*tileRow+i == tileN){//If displaying selected tile
-				fill(RSlider.value(),GSlider.value(),BSlider.value());//Set background color to the RGB value set by user
-				rect(scl*i + pX, pY, scl, scl);//Display color behind the tile
-			}
-			image(img[rowLength*tileRow+i], scl*i + pX, pY);//Draw tile
-		}
-	}
-	
-	NextButton.position(scl*(rowLength+1.7) + pX, (scl/2.5) + pY);//Update Next Button position
-	PrevButton.position(scl*(rowLength+.35) + pX, (scl/2.5) + pY);//Update Previous Button position
+
+
+	//Update and Draw the UI
+	UI.update();
+	UI.draw();
 }//Draw() END
 
 function mousePressed(){
-	mX = mouseX;
-	mY = mouseY;
-	pX = window.pageXOffset;
-	pY = window.pageYOffset;
+	//updateXY();
 	
 	if(mX > 0 + pX && mX < scl*(rowLength+3) + pX && mY > scl + pY && mY < scl*2 + pY){//Did we click on the color UI
 		noTile = true;//Dont allow tile placement
@@ -247,23 +159,17 @@ function mousePressed(){
 
 	// Did I click on the rectangle?
 	for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-		if(mapTiles[i].isCursorOn()){//Are we clicking on the tile
+		if(isCursorOnTile(i)){//Are we clicking on the tile
 			if(mouseButton == CENTER){//We clicked with the middle button
-				if(mapTiles.length > 1){//If there is more than 1 tile
-					for(var j = i; j < mapTiles.length - 1; j++){//Go through all tiles after the one we're deleting
-						mapTiles[j] = mapTiles[j + 1];//Shift the tile down 1
-					}
-				}
-				mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
+				deleteTile(i);
 				mapN = null;
 				deleting = true;//We're deleting
 				return false;//Don't do anything else
 			}else if(mouseButton == LEFT){//We clicked with the left button
 				mapN = i;//Keep track of what tile we clicked on
 				dragging = true;//We dragging
-				offsetX = mapTiles[i].x-mX;//If so, keep track of relative X location of click to corner of rectangle
-				offsetY = mapTiles[i].y-mY;//If so, keep track of relative Y location of click to corner of rectangle
-				mapTiles[i].loadColors();
+				updateOffset(mapN);
+				loadColors(mapN);
 				return false;//Don't do anything else
 			}/*else if(mouseButton == RIGHT){
 				return false;
@@ -283,20 +189,12 @@ function mousePressed(){
 }//mousePressed() END
 
 function mouseDragged(){
-	mX = mouseX;
-	mY = mouseY;
-	pX = window.pageXOffset;
-	pY = window.pageYOffset;
+	//updateXY();
 	
 	if(mouseButton == CENTER && deleting){//We dragging and deleting with the middle button
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-			if(mapTiles[i].isCursorOn()){//Are we clicking on the tile
-				if(mapTiles.length > 1){//If there is more than 1 tile
-					for(var j = i; j < mapTiles.length - 1; j++){//Go through all tiles after the one we're deleting
-						mapTiles[j] = mapTiles[j + 1];//Shift the tile down 1
-					}
-				}
-				mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
+			if(isCursorOnTile(i)){//Are we clicking on the tile
+				deleteTile(i);
 				mapN = null;
 			}
 		}
@@ -306,7 +204,7 @@ function mouseDragged(){
 	if(dragging){return false;}
 	
 	for(var i = mapTiles.length-1; i >= 0; i--){
-		if(mapTiles[i].isCursorOn()){
+		if(isCursorOnTile(i)){
 			return false;
 		}
 	}
@@ -324,7 +222,7 @@ function mouseDragged(){
 function mouseReleased(){
 	if(dragging){//Are we dragging a tile
 		if(mapTiles[mapN] != null){
-			mapTiles[mapN].snapLocation();//Snap XY location of tile to grid
+			snapTileLocation(mapN);//Snap XY location of tile to grid
 		}
 	}
 	
@@ -333,12 +231,7 @@ function mouseReleased(){
 
 	if(mapTiles[mapN] != null){
 		if(mapTiles[mapN].x >= pX && mapTiles[mapN].x < scl*rowLength + pX && mapTiles[mapN].y == pY){//Is the tile we just dropped on the UI
-			if(mapTiles.length > 1){//If there is more than 1 tile
-				for(var j = mapN; j < mapTiles.length - 1; j++){//Go through all tiles after the one we're deleting
-					mapTiles[j] = mapTiles[j + 1];//Shift the tile down 1
-				}
-			}
-			mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
+			deleteTile(mapN);
 			//return false;
 		}
 	}
@@ -392,6 +285,47 @@ function keyTyped(){
 	}
 }//keyTyped() END
 
+function drawImage(imageNum, x, y){
+	image(img[imageNum], x, y);
+}
+
+function isCursorOnTile(tile){
+	return(mX > mapTiles[tile].x - fV && mX < mapTiles[tile].x + scl + fV && mY > mapTiles[tile].y - fV && mY < mapTiles[tile].y + scl + fV);
+}
+
+function updateTileLocation(tile){//Adjust XY location of tile
+	mapTiles[tile].x = mX + offsetX;//Adjust X location of tile
+	mapTiles[tile].y = mY + offsetY;//Adjust Y location of tile
+}
+
+function snapTileLocation(tile){//Snap XY location of tile to grid
+	mapTiles[tile].x = Math.floor(mouseX / scl) * scl;//Adjust X location of tile
+	mapTiles[tile].y = Math.floor(mouseY / scl) * scl;//Adjust Y location of tile
+}
+
+function updateOffset(tile){//Update mouse XY offset relative to upper-left corner of tile
+	offsetX = mapTiles[tile].x-mX;//keep track of relative X location of click to corner of rectangle
+	offsetY = mapTiles[tile].y-mY;//keep track of relative Y location of click to corner of rectangle
+}
+
+function loadColors(tile){
+	RSlider.value(mapTiles[tile].r);//Set Red Slider value to Red value of the tile
+	GSlider.value(mapTiles[tile].g);//Set Green Slider value to Green value of the tile
+	BSlider.value(mapTiles[tile].b);//Set Blue Slider value to Blue value of the tile
+	RInput.value(mapTiles[tile].r);//Set Red Number Input value to Red value of the tile
+	GInput.value(mapTiles[tile].g);//Set Green Number Input value to Green value of the tile
+	BInput.value(mapTiles[tile].b);//Set Blue Number Input value to Blue value of the tile
+}
+
+function deleteTile(tile){
+	if(mapTiles.length > 1){//If there is more than 1 tile
+		for(var j = tile; j < mapTiles.length - 1; j++){//Go through all tiles after the one we're deleting
+			mapTiles[j] = mapTiles[j + 1];//Shift the tile down 1
+		}
+	}
+	mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
+}
+
 function mTile(x, y, image, r, g, b, clear){//Tile Object
 	this.x = x;//Store X Position
 	this.y = y;//Store Y Position
@@ -400,35 +334,109 @@ function mTile(x, y, image, r, g, b, clear){//Tile Object
 	this.g = g;//Store Green Value
 	this.b = b;//Store Blue Value
 	this.clear = clear;//Is the tile clear
-	
-	this.isCursorOn = function(){
-		return(mX > this.x - fV && mX < this.x + scl + fV && mY > this.y - fV && mY < this.y + scl + fV);
-	}
-	
-	this.loadColors = function(){
-		RSlider.value(this.r);//Set Red Slider value to Red value of the tile
-		GSlider.value(this.g);//Set Green Slider value to Green value of the tile
-		BSlider.value(this.b);//Set Blue Slider value to Blue value of the tile
-		RInput.value(this.r);//Set Red Number Input value to Red value of the tile
-		GInput.value(this.g);//Set Green Number Input value to Green value of the tile
-		BInput.value(this.b);//Set Blue Number Input value to Blue value of the tile
-	}
-	
-	this.updateLocation = function(){//Adjust XY location of tile
-		this.x = mX + offsetX;//Adjust X location of tile
-		this.y = mY + offsetY;//Adjust Y location of tile
-	}
-	
-	this.snapLocation = function(){//Snap XY location of tile to grid
-		this.x = Math.floor(mouseX / scl) * scl;//Snap X location of tile to grid
-		this.y = Math.floor(mouseY / scl) * scl;//Snap Y location of tile to grid
-	}
-	
-	this.display = function(){
-		if(!this.clear){//Is the tile colored
-			fill(this.r,this.g,this.b);//Set Tile background color
-			rect(this.x,this.y,scl,scl);//Draw colored square behind tile
-		}
-		image(img[this.image], this.x, this.y);//Draw tile
-	}
 }//mTile() END
+
+function BGFunc(){
+	this.draw = function(){
+		//Draw white background
+		background(255);
+		
+		//Draw Grid on Screen
+		for(var i = 0; i < cols + 1; i++){//Draw all the column lines
+			line(scl * i, 0, scl * i, rows*scl);//Draw Verticle lines
+		}
+		for(var i = 0; i < rows + 1; i++){//Draw all the row lines
+			line(0, scl * i, cols*scl, scl * i);//Draw Horizontal Lines
+		}
+	}
+}
+
+function tileUI(){
+	
+	this.draw = function(){
+		fill(RSlider.value(),GSlider.value(),BSlider.value());//Set background color to the RGB value set by user
+		rect(0 + pX, scl + pY, scl*3, scl);//Display color behind RGB Sliders
+		
+		fill(255);//Set background color to white
+		rect(pX, pY, scl*rowLength, scl);//Create rectangle behind tiles UI
+		for(var i = 0; i < rowLength; i++){//Loop through all the tiles
+			if(rowLength*tileRow+i <= totalImages+1){//If tile exists
+				if(rowLength*tileRow+i == tileN){//If displaying selected tile
+					fill(RSlider.value(),GSlider.value(),BSlider.value());//Set background color to the RGB value set by user
+					rect(scl*i + pX, pY, scl, scl);//Display color behind the tile
+				}
+				image(img[rowLength*tileRow+i], scl*i + pX, pY);//Draw tile
+			}
+		}
+	}
+	
+	this.update = function(){
+		//Update color slider locations
+		RSlider.position(0 + pX, scl+((scl/6)*1) + pY);//Update Red Slider position
+		GSlider.position(0 + pX, scl+((scl/6)*3) + pY);//Update Green Slider position
+		BSlider.position(0 + pX, scl+((scl/6)*5) + pY);//Update Blue Slider position
+		
+		//Update color input box locations
+		RInput.position((scl*5)+(scl/2) + pX, scl+(scl/2.5) + pY);//Update Red Number Input position
+		GInput.position((scl*6)+(scl/2) + pX, scl+(scl/2.5) + pY);//Update Green Number Input position
+		BInput.position((scl*7)+(scl/2) + pX, scl+(scl/2.5) + pY);//Update Blue Number Input position
+		
+		//Update checkbox location
+		CCheckBox.position((scl*3)+(scl/2) + pX, scl+(scl/2.2) + pY);
+		
+		//Update button locations
+		SaveButton.position((scl*8.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
+		LoadButton.position((scl*10)+(scl/2) + pX, scl+(scl/2.5) + pY);
+		DeleteButton.position((scl*11.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
+		ClearButton.position((scl*13)+(scl/2) + pX, scl+(scl/2.5) + pY);
+		FileSaveButton.position((scl*14.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
+		//FileLoadButton.position((scl*19.5)+(scl/2) + pX, scl+(scl/2) + pY);
+		NextButton.position(scl*(rowLength+1.7) + pX, (scl/2.5) + pY);//Update Next Button position
+		PrevButton.position(scl*(rowLength+.35) + pX, (scl/2.5) + pY);//Update Previous Button position
+	}
+	
+	this.setup = function(){
+		//Color Slider Inputs
+		RSlider = createSlider(0,255,127);//(Min, Max, Start)
+		RSlider.changed(function RSliderC() {RInput.value(this.value());});//The function to run when changed
+		RSlider.style('width', scl*2.8+'px');//Width of slider
+		GSlider = createSlider(0,255,127);//(Min, Max, Start)
+		GSlider.changed(function GSliderC() {GInput.value(this.value());});//The function to run when changed
+		GSlider.style('width', scl*2.8+'px');//Width of slider
+		BSlider = createSlider(0,255,127);//(Min, Max, Start)
+		BSlider.changed(function BSliderC() {BInput.value(this.value());});//The function to run when changed
+		BSlider.style('width', scl*2.8+'px');//Width of slider
+		
+		//Color Input Boxes
+		RInput = createInput(255);//(Start)
+		RInput.input(function RInputC() {RSlider.value(this.value());});//The function to run when changed
+		RInput.style('width', scl+'px');//Width of input box
+		GInput = createInput(255);//(Start)
+		GInput.input(function GInputC() {GSlider.value(this.value());});//The function to run when changed
+		GInput.style('width', scl+'px');//Width of input box
+		BInput = createInput(255);//(Start)
+		BInput.input(function BInputC() {BSlider.value(this.value());});//The function to run when changed
+		BInput.style('width', scl+'px');//Width of input box
+		
+		//Clear Checkbox
+		CCheckBox = createCheckbox('Clear', false);//(Start Unchecked)
+		CCheckBox.changed(function CCheckBoxF() {if(this.checked()){CClear = true;}else{CClear = false;}});//The function to run when changed
+		
+		//Buttons
+		SaveButton = createButton('Save');//Text of button
+		SaveButton.mousePressed(SaveCanvas);//The function to run when pressed
+		LoadButton = createButton('Load');//Text of button
+		LoadButton.mousePressed(LoadCanvas);//The function to run when pressed
+		DeleteButton = createButton('Delete');//Text of button
+		DeleteButton.mousePressed(DeleteCanvas);//The function to run when pressed
+		ClearButton = createButton('Clear');//Text of button
+		ClearButton.mousePressed(ClearCanvas);//The function to run when pressed
+		FileSaveButton = createButton('Save File');//Text of button
+		FileSaveButton.mousePressed(FileSaveCanvas);//The function to run when pressed
+		//FileLoadButton = createFileInput(FileLoadCanvas);
+		NextButton = createButton('Next');//Text of button
+		NextButton.mousePressed(NextButtonC);//The function to run when pressed
+		PrevButton = createButton('Prev');//Text of button
+		PrevButton.mousePressed(PrevButtonC);//The function to run when pressed
+	}
+}
