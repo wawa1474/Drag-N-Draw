@@ -116,24 +116,21 @@ function FileSaveCanvas(){//Save the Canvas to a file
 		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
 	}//Went through all the tiles
 	save('MapCanvas.png');//Save the map to a PNG file
-	//var MapJSON = JSON.stringify(mapTiles);
-	//saveJSON(mapTiles, 'Map2.json');
 	FileSaveMap();
 }//FileSaveCanvas() END
 
 function FileSaveMap(){//Save the Map to file
 	mapTable = new p5.Table();
-	mapTable.addColumn('x');
-	mapTable.addColumn('y');
-	mapTable.addColumn('image');
-	mapTable.addColumn('r');
-	mapTable.addColumn('g');
-	mapTable.addColumn('b');
-	mapTable.addColumn('clear');
+	mapTable.addColumn('x');//Tile X position
+	mapTable.addColumn('y');//Tile Y position
+	mapTable.addColumn('image');//Tile Image
+	mapTable.addColumn('r');//Tile Red amount
+	mapTable.addColumn('g');//Tile Green amount
+	mapTable.addColumn('b');//Tile Blue amount
+	mapTable.addColumn('clear');//Is Tile Clear
 	var newRow;
 	for(var i = 0; i < mapTiles.length - 1; i++){
-		newRow = mapTable.addRow();
-		console.log(i);
+		newRow = mapTable.addRow();//Add a row to table
 		newRow.set('x',mapTiles[i].x);//Tile X position
 		newRow.set('y',mapTiles[i].y);//Tile Y position
 		newRow.set('image',mapTiles[i].image);//Tile Image
@@ -141,35 +138,30 @@ function FileSaveMap(){//Save the Map to file
 		newRow.set('g',mapTiles[i].g);//Tile Green amount
 		newRow.set('b',mapTiles[i].b);//Tile Blue amount
 		var CLEAR = 1;
-		if(!mapTiles[i].clear){
+		if(!mapTiles[i].clear){//Is Tile Clear
 			CLEAR = 0;
 		}
-		newRow.set('clear',CLEAR);//Tile Clear
+		newRow.set('clear',CLEAR);//Is Tile Clear
 	}
-	console.log(mapTable);
-	saveTable(mapTable, 'MAP.csv');
+	saveTable(mapTable, 'MAP.csv');//Save the Map to a CSV file
+	mapTable = null;//Clear the Table
 }
 
 function FileLoadMap(){//Load the Map from file
-	console.log("Loading MAP.csv");
 	mapTiles = [];//Clear the array
-	console.log(mapTable.getRowCount());
-	console.log(mapTable.getColumnCount());
-	console.log(mapTable);
 	for(var i = 0; i < mapTable.getRowCount(); i++){//Loop through all the rows
 		var CLEAR = true;
-		if(mapTable.get(i,'clear') == 0){
+		if(mapTable.get(i,'clear') == 0){//Is Tile Clear
 			CLEAR = false;
 		}
-		mapTiles[i] = new mTile(mapTable.get(i,'x'),
-												  mapTable.get(i,'y'),
-												  mapTable.get(i,'image'),
-												  mapTable.get(i,'r'),
-												  mapTable.get(i,'g'),
-												  mapTable.get(i,'b'),
-												  CLEAR);//x,y,image,r,g,b,clear
+		mapTiles[i] = new mTile(int(mapTable.get(i,'x')),//Tile X position
+												  int(mapTable.get(i,'y')),//Tile Y position
+												  int(mapTable.get(i,'image')),//Tile Image
+												  int(mapTable.get(i,'r')),//Tile Red amount
+												  int(mapTable.get(i,'g')),//Tile Green amount
+												  int(mapTable.get(i,'b')),//Tile Blue amount
+												  CLEAR);//Is Tile Clear
 	}
-	console.log(mapTiles);
 	if(mapTiles == null){//Is the array null
 		mapTiles = [];//Reset the map array
 	}
