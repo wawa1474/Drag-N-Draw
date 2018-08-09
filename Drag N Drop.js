@@ -39,6 +39,8 @@ var img = [];//Tile Image Array
 var mapTiles = [];//Map Tiles Array
 
 var mapTable;//Map Table
+var fileNameInput;//File Name Input
+var fileName = 'Map1';//File Name
 
 var player = new player();//Player
 
@@ -54,7 +56,7 @@ function preload(){//Preload all of the images
 	
 	player.image = loadImage('assets/Player.png');//Player Image
 	
-	mapTable = loadTable('MAP.csv', 'csv', 'header');//Load the csv
+	//mapTable = loadTable('MAP.csv', 'csv', 'header');//Load the csv
 }//preload() END
 
 function setup(){//Setup everything
@@ -143,11 +145,16 @@ function FileSaveMap(){//Save the Map to file
 		}
 		newRow.set('clear',CLEAR);//Is Tile Clear
 	}
-	saveTable(mapTable, 'MAP.csv');//Save the Map to a CSV file
+	saveTable(mapTable, fileName + '.csv');//Save the Map to a CSV file
 	mapTable = null;//Clear the Table
 }
 
-function FileLoadMap(){//Load the Map from file
+function FileLoadMap(){
+	loadTable(fileName + '.csv', 'csv', 'header', FileLoadMap2);//Load the csv
+}
+
+function FileLoadMap2(table){//Load the Map from file
+	mapTable = table;//loadTable(fileName + '.csv', 'csv', 'header');//Load the csv
 	mapTiles = [];//Clear the array
 	for(var i = 0; i < mapTable.getRowCount(); i++){//Loop through all the rows
 		var CLEAR = true;
@@ -581,6 +588,8 @@ function tileUI(){//The tile UI
 		FileLoadButton.position((scl*19.5)+(scl/2) + pX, scl+(scl/2) + pY);//Update File Load button location
 		NextButton.position(scl*(rowLength+1.7) + pX, (scl/2.5) + pY);//Update Next Button position
 		PrevButton.position(scl*(rowLength+.35) + pX, (scl/2.5) + pY);//Update Previous Button position
+		
+		fileNameInput.position((scl*21.5)+(scl/2) + pX, scl+(scl/2) + pY);//File Name Input Position
 	}//tileUI.update() END
 	
 	this.setup = function(){//Setup the UI
@@ -632,6 +641,9 @@ function tileUI(){//The tile UI
 		NextButton.mousePressed(NextButtonC);//The function to run when pressed
 		PrevButton = createButton('Prev');//Text of button
 		PrevButton.mousePressed(PrevButtonC);//The function to run when pressed
+		
+		fileNameInput = createInput(fileName);
+		fileNameInput.input(function fileNameInputF(){fileName = this.value(); console.log(this.value());});
 	}//tileUI.setup() END
 }//tileUI() END
 
