@@ -8,7 +8,7 @@ var mapN = 0;//Which map peice are we messing with
 var totalImages = 39;//Total Images
 var RSlider, GSlider, BSlider;//RGB Sliders
 var RInput, GInput, BInput;//RGB number Inputs
-var CCheckBox, CClear;//Clear Checkbox
+var CCheckBox, CClear = 0;//Clear Checkbox
 var SaveButton, LoadButton, DeleteButton, ClearButton, FileSaveButton, FileLoadButton;//Button Variables
 var NextButton, PrevButton;//Next and Previous row buttons
 var rowLength = 16;//How many tiles per row?
@@ -210,7 +210,7 @@ function draw(){//Draw the canvas
 
 	//Display Map Tiles
 	for(var i = 0; i < mapTiles.length; i++){//Go through all the tiles
-		if(!mapTiles[i].clear){//Is the tile colored
+		if(!mapTiles[i].clear || mapTiles[i].image == 0){//Is the tile colored
 			fill(mapTiles[i].r,mapTiles[i].g,mapTiles[i].b);//Set Tile background color
 			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);//Draw colored square behind tile
 		}
@@ -231,6 +231,16 @@ function draw(){//Draw the canvas
 
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
+	
+	if(mouseButton == RIGHT){
+		for(var i = 0; i <= mapTiles.length-1; i++){
+			if(isCursorOnTile(i)){//Are we clicking on the tile
+				mapTiles[i].r = RSlider.value();
+				mapTiles[i].g = GSlider.value();
+				mapTiles[i].b = BSlider.value();
+			}
+		}
+	}
 
 	for(var i = 0; i < rowLength; i++){//Go through all the tiles in the row
 		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && mY > 0 + pY + fV && mY < scl + pY - fV){//Are we clicking on the tile UI
@@ -261,6 +271,7 @@ function mousePressed(){//We pressed a mouse button
 				loadColors(i);//Load the color inputs and sliders with the color from the tile
 				return false;//Block normal action
 			}/*else if(mouseButton == RIGHT){
+				mylog.log("Right");
 				//loadTile(i);
 				//updateTileRow();//Get the row to whatever tile were on
 				//return false;
@@ -275,6 +286,16 @@ function mousePressed(){//We pressed a mouse button
 
 function mouseDragged(){//We dragged the mouse while holding a button
 	//updateXY();
+	
+	if(mouseButton == RIGHT){
+		for(var i = 0; i <= mapTiles.length-1; i++){
+			if(isCursorOnTile(i)){//Are we clicking on the tile
+				mapTiles[i].r = RSlider.value();
+				mapTiles[i].g = GSlider.value();
+				mapTiles[i].b = BSlider.value();
+			}
+		}
+	}
 	
 	if(mouseButton == CENTER && deleting){//We dragging and deleting with the middle button
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
@@ -294,7 +315,11 @@ function mouseDragged(){//We dragged the mouse while holding a button
 	}
 	
 	for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-		if(isCursorOnTile(i)){//Are we clicking on the tile
+		if(isCursorOnTile(i) && !checkImage(tileN)){//Are we clicking on the tile
+			return false;//Block normal action
+		}else if(mouseButton == CENTER && isCursorOnTile(i)){
+			return false;//Block normal action
+		}else if(isCursorOnTile(i) && !CClear){
 			return false;//Block normal action
 		}
 	}//Went through all the tiles
@@ -480,15 +505,15 @@ function loadTile(tile){
 }//loadColors() END
 
 function checkImage(tile){
-	for(var i = 0; i < mapTiles.length - 1; i++){//Go through all tiles
-		if(isCursorOnTileNoFV(i)){//Is the mouse cursor on the tile we're checking?
+	for(var i = mapTiles.length - 1; i >= 0; i--){//Go through all tiles
+		if(isCursorOnTile(i)){//Is the mouse cursor on the tile we're checking?
 			if(tile == mapTiles[i].image){//Is the tile image we're on the same as the one we're trying to place?
-				console.log("False");
+				//mylog.log("False", "Image", i, ", ", mapTiles[i].image, ", ", tile);
 				return false;//Don't place tile
 			}
 		}
 	}
-	console.log("True");
+	//console.log("True");
 	return true;//Place tile
 }//checkImage() END
 
@@ -500,7 +525,7 @@ function placeTile(){//Place a tile at the mouses location
 		}else if(mouseButton == LEFT){//We're dragging with the left button
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 		}else if(mouseButton == RIGHT){//We clicked with the right button
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
+			//mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 		}
 	}
 	//console.log(mapTiles.length);//How many tiles are there?
@@ -573,7 +598,7 @@ function tileUI(){//The tile UI
 		
 		textSize(24);
 		fill(255,0,0);
-		text(mapTiles.length, scl*17.3, scl*1.8);
+		text(mapTiles.length, scl*17.3 + pX, scl*1.8 + pY);
 		textSize(12);//Default
 	}//tileUI.draw = function() END
 	
