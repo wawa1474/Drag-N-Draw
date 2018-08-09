@@ -153,9 +153,9 @@ function mousePressed(){//We pressed a mouse button
 
 	for(var i = 0; i < rowLength; i++){//Go through all the tiles in the row
 		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && mY > 0 + pY + fV && mY < scl + pY - fV){//Are we clicking on the tile UI
-			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Create a tile
 			noTile = true;//Dont allow tile placement
 			tileN = rowLength*tileRow+i;//Set the tile cursor to the tile we clicked on
+			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Create a tile
 		}
 	}//Went through all the tiles in the row
 
@@ -173,9 +173,10 @@ function mousePressed(){//We pressed a mouse button
 				updateOffset(i);//Update the mouse offset of the tile
 				loadColors(i);//Load the color inputs and sliders with the color from the tile
 				return false;//Don't do anything else
-			}/*else if(mouseButton == RIGHT){
+			}else if(mouseButton == RIGHT){
+				loadTile(i);
 				return false;
-			}*/
+			}
 		}
 	}//Went through all the tiles
 	
@@ -307,6 +308,10 @@ function loadColors(tile){
 	RInput.value(mapTiles[tile].r);//Set Red Number Input value to Red value of the tile
 	GInput.value(mapTiles[tile].g);//Set Green Number Input value to Green value of the tile
 	BInput.value(mapTiles[tile].b);//Set Blue Number Input value to Blue value of the tile
+}//loadColors() END
+
+function loadTile(tile){
+	tileN = mapTiles[tile].image;//Set Red Slider value to Red value of the tile
 }//loadColors() END
 
 function placeTile(){//Place a tile at the mouses location
