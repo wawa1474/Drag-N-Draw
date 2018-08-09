@@ -18,6 +18,7 @@ var rows = 100;//Rows
 
 
 var SX = SY = 0;
+var mX, mY;
 var scrollamount = 5;
 
 var img = [];
@@ -112,11 +113,11 @@ function draw() {
 	window.scrollTo(Math.floor((SX)/scl) * scl, Math.floor((SY)/scl) * scl)//window.pageXOffset, Math.floor(window.pageYOffset/scl) * scl);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	CCheckBox.position((scl*6)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	SaveButton.position((scl*11.5)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	LoadButton.position((scl*13)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	DeleteButton.position((scl*14.5)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	ClearButton.position((scl*16)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	CCheckBox.position((scl*6)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
+	SaveButton.position((scl*11.5)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
+	LoadButton.position((scl*13)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
+	DeleteButton.position((scl*14.5)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
+	ClearButton.position((scl*16)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,43 +156,44 @@ function draw() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	RSlider.position(scl*3, scl+((scl/6)*1) + window.pageYOffset);
-	GSlider.position(scl*3, scl+((scl/6)*3) + window.pageYOffset);
-	BSlider.position(scl*3, scl+((scl/6)*5) + window.pageYOffset);
-	RInput.position((scl*8)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	GInput.position((scl*9)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	BInput.position((scl*10)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	RSlider.position(scl*3 + window.pageXOffset, scl+((scl/6)*1) + window.pageYOffset);
+	GSlider.position(scl*3 + window.pageXOffset, scl+((scl/6)*3) + window.pageYOffset);
+	BSlider.position(scl*3 + window.pageXOffset, scl+((scl/6)*5) + window.pageYOffset);
+	RInput.position((scl*8)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
+	GInput.position((scl*9)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
+	BInput.position((scl*10)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
 	
 	fill(RSlider.value(),GSlider.value(),BSlider.value());
-	rect(scl*2, scl + window.pageYOffset, scl*4, scl);
+	//rect(scl*2 + window.pageXOffset, scl + window.pageYOffset, scl*4, scl);
+	rect(scl*3 + window.pageXOffset, scl + window.pageYOffset, scl*3, scl);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	for(var i = 0; i < mapTiles.length; i++){//Color Tiles
+	/*for(var i = 0; i < mapTiles.length; i++){//Color Tiles
 		if(!dragging){
-			if(mapTiles[i].x == scl*2 && mapTiles[i].y == scl + window.pageYOffset){
+			if(mapTiles[i].x == scl*2 + window.pageXOffset && mapTiles[i].y == scl + window.pageYOffset){
 				RSlider.value(red(mapTiles[i].color));
 				GSlider.value(green(mapTiles[i].color));
 				BSlider.value(blue(mapTiles[i].color));
 				RInput.value(red(mapTiles[i].color));
 				GInput.value(green(mapTiles[i].color));
 				BInput.value(blue(mapTiles[i].color));
-				mapTiles[i].x = 0;
+				mapTiles[i].x = 0 + window.pageXOffset;
 				mapTiles[i].y = scl + window.pageYOffset;
 			}
 		}
 	}
 	
-	image(img[img.length-1], scl*2, scl + window.pageYOffset);//Color Picker
+	image(img[img.length-1], scl*2 + window.pageXOffset, scl + window.pageYOffset);//Color Picker*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for(var i = 0; i < img.length - 2; i++){//Pickable Tiles
 		if(i == TileN){
 			fill(RSlider.value(),GSlider.value(),BSlider.value());
-			rect(scl*i, window.pageYOffset, scl, scl);
+			rect(scl*i + window.pageXOffset, window.pageYOffset, scl, scl);
 		}
-		image(img[i], scl*i, window.pageYOffset);
+		image(img[i], scl*i + window.pageXOffset, window.pageYOffset);
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -215,13 +217,13 @@ function draw() {
 
 function mousePressed() {
 	for(var i = 0; i < img.length; i++){
-		if(mouseX > scl*i && mouseX < scl*(i+1) && mouseY > 0 + window.pageYOffset && mouseY < scl + window.pageYOffset){
-			mapTiles[mapTiles.length] = new mTile(scl*i,0 + window.pageYOffset,i,color(RSlider.value(),GSlider.value(),BSlider.value()), CClear);
+		if(mouseX > scl*i + window.pageXOffset && mouseX < scl*(i+1) + window.pageXOffset && mouseY > 0 + window.pageYOffset && mouseY < scl + window.pageYOffset){
+			mapTiles[mapTiles.length] = new mTile(scl*i + window.pageXOffset,0 + window.pageYOffset,i,color(RSlider.value(),GSlider.value(),BSlider.value()), CClear);
 		}
 	}
-	if(mouseX > scl*2 && mouseX < scl*3 && mouseY > scl + window.pageYOffset && mouseY < scl*2 + window.pageYOffset){
-		mapTiles[mapTiles.length] = new mTile(scl*2,scl + window.pageYOffset,img.length-1,color(RSlider.value(),GSlider.value(),BSlider.value()), false);
-	}
+	/*if(mouseX > scl*2 + window.pageXOffset && mouseX < scl*3 + window.pageXOffset && mouseY > scl + window.pageYOffset && mouseY < scl*2 + window.pageYOffset){
+		mapTiles[mapTiles.length] = new mTile(scl*2 + window.pageXOffset,scl + window.pageYOffset,img.length-1,color(RSlider.value(),GSlider.value(),BSlider.value()), false);
+	}*/
 	// Did I click on the rectangle?
 	for(var i = mapTiles.length-1; i >= 0; i--){
 		if(mouseX > mapTiles[i].x && mouseX < mapTiles[i].x + scl && mouseY > mapTiles[i].y && mouseY < mapTiles[i].y + scl){
@@ -260,6 +262,30 @@ function mousePressed() {
 		}
 	}
 	if(mouseButton == CENTER){return false;}
+}
+
+function mouseDragged(){
+	mX = mouseX;
+	my = mouseY;
+	for(var i = mapTiles.length-1; i >= 0; i--){
+		if(mX > mapTiles[i].x && mX < mapTiles[i].x + scl && my > mapTiles[i].y && my < mapTiles[i].y + scl){
+			return;
+		}
+	}
+	if(dragging){
+		return;
+	}
+	if(!(my < scl*2 + window.pageYOffset) && my < (windowHeight - (scl*1.5)) + window.pageYOffset && mX < (windowWidth - (scl)) + window.pageXOffset){
+		if(mouseButton == CENTER){
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,img.length-1,color(RSlider.value(),GSlider.value(),BSlider.value()), false);
+			//console.log(mapTiles[mapTiles.length-1].color);
+		}
+		if(mouseButton == LEFT){
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,TileN,color(RSlider.value(),GSlider.value(),BSlider.value()), CClear);
+			//console.log(mapTiles[mapTiles.length-1].color);
+		}
+	}
+	//return false;
 }
 
 function mouseReleased() {
