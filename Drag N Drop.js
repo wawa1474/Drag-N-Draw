@@ -96,6 +96,13 @@ function SaveCanvas(){//Save the canvas to local storage
 	localStorage.setItem("MapJSON", MapJSON);//Save the canvas to local storage
 }//SaveCanvas() END
 
+function LoadCanvas(){//Load the canvas from local storage
+	mapTiles = JSON.parse(localStorage.getItem("MapJSON"));//Set the map array
+	if(mapTiles == null){//Is the array null
+		mapTiles = [];//Reset the map array
+	}
+}//LoadCanvas() END
+
 function FileSaveCanvas(){//Save the Canvas to a file
 	BG.draw();//Draw the background and grid
 	//Display Map Tiles
@@ -122,32 +129,23 @@ function FileSaveMap(){//Save the Map to file
 	mapTable.addColumn('b');
 	mapTable.addColumn('clear');
 	for(var i = 0; i < mapTiles.length - 1; i++){
-		mapTable.addRow();
+		var newRow = mapTable.addRow();
 		console.log(i);
-		mapTable.set(i,'x',mapTiles[i].x);//Tile X position
-		mapTable.set(i,'y',mapTiles[i].y);//Tile X position
-		mapTable.set(i,'image',mapTiles[i].image);//Tile X position
-		mapTable.set(i,'r',mapTiles[i].r);//Tile X position
-		mapTable.set(i,'g',mapTiles[i].g);//Tile X position
-		mapTable.set(i,'b',mapTiles[i].b);//Tile X position
-		mapTable.set(i,'clear',mapTiles[i].clear);//Tile X position
+		newRow.set('x',mapTiles[i].x);//Tile X position
+		newRow.set('y',mapTiles[i].y);//Tile X position
+		newRow.set('image',i,mapTiles[i].image);//Tile X position
+		newRow.set('r',mapTiles[i].r);//Tile X position
+		newRow.set('g',mapTiles[i].g);//Tile X position
+		newRow.set('b',mapTiles[i].b);//Tile X position
+		var CLEAR = 1;
+		if(!mapTiles[i].clear){
+			CLEAR = 0;
+		}
+		newRow.set('clear',CLEAR);//Tile X position
 	}
+	console.log(mapTable);
 	saveTable(mapTable, 'MAP.csv');
 }
-/* this.x = x;//Store X Position
-this.y = y;//Store Y Position
-this.image = image;//Store Image Number
-this.r = r;//Store Red Value
-this.g = g;//Store Green Value
-this.b = b;//Store Blue Value
-this.clear = clear;//Is the tile clear */
-
-function LoadCanvas(){//Load the canvas from local storage
-	mapTiles = JSON.parse(localStorage.getItem("MapJSON"));//Set the map array
-	if(mapTiles == null){//Is the array null
-		mapTiles = [];//Reset the map array
-	}
-}//LoadCanvas() END
 
 function FileLoadMap(){//Load the Map from file
 	console.log("Loading MAP.csv");
@@ -158,7 +156,7 @@ function FileLoadMap(){//Load the Map from file
 	console.log(mapTable);
 	for(var i = 0; i < mapTable.getRowCount(); i++){//Loop through all the rows
 		var CLEAR = true;
-		if(mapTable.get(i,'clear') == undefined){
+		if(mapTable.get(i,'clear') == 0){
 			CLEAR = false;
 		}
 		mapTiles[i] = new mTile(mapTable.get(i,'x'),
