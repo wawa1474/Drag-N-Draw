@@ -5,7 +5,7 @@ var deleting = false;//Are we deleting tiles?
 var noTile = false;//Are we blocking placement of tiles?
 
 var mapN = 0;//Which map peice are we messing with
-var totalImages = 46;//Total Images
+var totalImages = 54;//Total Images
 var RSlider, GSlider, BSlider;//RGB Sliders
 var RInput, GInput, BInput;//RGB number Inputs
 var CCheckBox, CClear;//Clear Checkbox
@@ -28,7 +28,10 @@ var rows = 100;//Rows
 var SX = SY = 0;//Screen XY
 var mX, mY, pX, pY;//Mouse XY, Page Offset XY
 var fV = 1;//Fudge Value
+
+
 var scrollAmount = 5;//How many squares to scroll when pressing WASD
+var scrollSlider;
 
 var img = [];//Tile Image Array
 var mapTiles = [];//Map Tiles Array
@@ -86,9 +89,18 @@ function SaveCanvas(){//Save the canvas to local storage
 }//SaveCanvas() END
 
 function FileSaveCanvas(){//Save the map to a file
+	BG.draw();//Draw the background and grid
+	//Display Map Tiles
+	for(var i = 0; i < mapTiles.length; i++){//Go through all the tiles
+		if(!mapTiles[i].clear){//Is the tile colored
+			fill(mapTiles[i].r,mapTiles[i].g,mapTiles[i].b);//Set Tile background color
+			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);//Draw colored square behind tile
+		}
+		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
+	}//Went through all the tiles
 	save('MapCanvas.png');//Save the map to a PNG file
 	//var MapJSON = JSON.stringify(mapTiles);
-	saveJSON(mapTiles, 'Map2.json');
+	//saveJSON(mapTiles, 'Map2.json');
 }//FileSaveCanvas() END
 
 function LoadCanvas(){//Load the canvas from local storage
@@ -98,8 +110,52 @@ function LoadCanvas(){//Load the canvas from local storage
 	}
 }//LoadCanvas() END
 
+function loadJSON2(callback) {   
+    var xobj = new XMLHttpRequest();
+    xobj.overrideMimeType("application/json");
+    xobj.open('GET', 'mapJSON.json', true); // Replace 'my_data' with the path to your file
+    xobj.onreadystatechange = function () {
+        if (xobj.readyState == 4 && xobj.status == "200") {
+			// Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+			callback(xobj.responseText);
+        }
+    };
+    xobj.send(null);  
+ }
+
 function FileLoadCanvas(file){//Load the canvas from storage
-	mapTiles = JSON.parse(JSON.stringify(file));//Set the map array
+	//mapTiles = JSON.parse(JSON.stringify(file));//Set the map array
+	console.log("Loading mapJSON.json");
+	var mapJSON;// = loadJSON("mapJSON.json");
+	loadJSON2(function(response) {
+		// Parse JSON string into object
+		mapJSON = JSON.parse(response);
+	});
+	mapJSON = JSON.parse(mapJSON);
+	//var JSONlength = Object.keys(mapJSON).length;
+	//console.log(mapJSON.length);
+	console.log(Object.entries(mapJSON));
+	if(mapJSON != null){
+		mapTiles = [];
+	}
+	for (var key in mapJSON) {
+		if (mapJSON.hasOwnProperty(key)) {
+			console.log(mapJSON[key].x);
+			console.log(mapJSON[key].y);
+		}
+	}
+	for(var i = 0; i < mapJSON.length; i++){
+		//mTile(x, y, image, r, g, b, clear){//Tile Object
+		console.log(mapJSON[i].x);
+		mapTiles[i] = new mTile(mapJSON.properties[i].x,
+												  mapJSON.features[i].properties.y,
+												  mapJSON.features[i].properties.image,
+												  mapJSON.features[i].properties.r,
+												  mapJSON.features[i].properties.g,
+												  mapJSON.features[i].properties.b,
+												  mapJSON.features[i].properties.clear);
+	}
+	console.log(mapTiles);
 	if(mapTiles == null){//Is the array null
 		mapTiles = [];//Reset the map array
 	}
@@ -130,7 +186,7 @@ function draw(){//Draw the canvas
 
 	//If dragging a tile: update location
 	if (dragging){//Are we dragging a tile
-		if(mapTiles[mapN] != null){
+		if(mapTiles[mapN] != null){//If tile exists
 			updateTileLocation(mapN);//Adjust XY location of tile
 		}
 	}
@@ -174,24 +230,24 @@ function mousePressed(){//We pressed a mouse button
 				deleteTile(i);//Delete a tile and update the array
 				mapN = null;//We're not holding a tile
 				deleting = true;//We're deleting
-				return false;//Don't do anything else
+				return false;//Block normal action
 			}else if(mouseButton == LEFT){//We clicked with the left button
 				mapN = i;//Keep track of what tile we clicked on
 				dragging = true;//We dragging
 				updateOffset(i);//Update the mouse offset of the tile
 				loadColors(i);//Load the color inputs and sliders with the color from the tile
-				return false;//Don't do anything else
+				return false;//Block normal action
 			}/*else if(mouseButton == RIGHT){
-				loadTile(i);
-				updateTileRow();//Get the row to whatever tile were on
-				return false;
+				//loadTile(i);
+				//updateTileRow();//Get the row to whatever tile were on
+				//return false;
 			}*/
 		}
 	}//Went through all the tiles
 	
 	placeTile();//Place a tile at current mouse position
 	
-	if(mouseButton == CENTER){return false;}//Don't allow normal middle mouse button action
+	if(mouseButton == CENTER){return false;}//Block normal action
 }//mousePressed() END
 
 function mouseDragged(){//We dragged the mouse while holding a button
@@ -211,12 +267,12 @@ function mouseDragged(){//We dragged the mouse while holding a button
 	}
 
 	if(dragging){//We're dragging
-		return false;//Don't do anything else
+		return false;//Block normal action
 	}
 	
 	for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
 		if(isCursorOnTile(i)){//Are we clicking on the tile
-			return false;//Don't do anything else
+			return false;//Block normal action
 		}
 	}//Went through all the tiles
 
@@ -227,7 +283,7 @@ function mouseDragged(){//We dragged the mouse while holding a button
 
 function mouseReleased(){//We released the mouse button
 	if(dragging){//Are we dragging a tile
-		if(mapTiles[mapN] != null){//Does the tile exist
+		if(mapTiles[mapN] != null){//If tile exists
 			snapTileLocation(mapN);//Snap XY location of tile to grid
 		}
 	}
@@ -235,13 +291,22 @@ function mouseReleased(){//We released the mouse button
 	dragging = false;//Quit dragging
 	noTile = false;//Allow tile placement
 
-	if(mapTiles[mapN] != null){//Does the tile exist
+	if(mapTiles[mapN] != null){//If tile exists
 		if(mapTiles[mapN].x >= pX && mapTiles[mapN].x < scl*rowLength + pX && mapTiles[mapN].y == pY){//Is the tile we just dropped on the UI
 			deleteTile(mapN);//Delete a tile and update the array
 			//return false;
 		}
 	}
 }//mouseReleased() END
+
+function keyPressed(){//We pressed a key
+	if (keyCode == 16){//We pressed shift
+		PrevButtonC();//Previous Tile row
+	}else if (keyCode == 32){//We pressed space
+		NextButtonC();//Next Tile Row
+		return false;//Block normal action
+	}
+}
 
 function keyTyped(){//We typed a key
 	if(key == 'q'){//We pressed 'Q'
@@ -297,6 +362,22 @@ function keyTyped(){//We typed a key
 				updateTileRow();//Get the row to whatever tile were on
 			}
 		}
+	}else if(key == 'i'){//We pressed 'I'
+		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+			mapTiles[i].y -= scl * scrollAmount;//Move tile up 1 space
+		}
+	}else if(key == 'j'){//We pressed 'J'
+		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+			mapTiles[i].x -= scl * scrollAmount;//Move tile left 1 space
+		}
+	}else if(key == 'k'){//We pressed 'K'
+		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+			mapTiles[i].y += scl * scrollAmount;//Move tile down 1 space
+		}
+	}else if(key == 'l'){//We pressed 'L'
+		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+			mapTiles[i].x += scl * scrollAmount;//Move tile right 1 space
+		}
 	}
 }//keyTyped() END
 
@@ -318,6 +399,10 @@ function updateTileRow(){//Get the row to whatever tile were on
 function isCursorOnTile(tile){//Is the mouse cursor on the tile we're checking?
 	return(mX > mapTiles[tile].x - fV && mX < mapTiles[tile].x + scl + fV && mY > mapTiles[tile].y - fV && mY < mapTiles[tile].y + scl + fV);//Are we clicking on the tile
 }//isCursorOnTile() END
+
+function isCursorOnTileNoFV(tile){//Is the mouse cursor on the tile we're checking?
+	return(mX > mapTiles[tile].x && mX < mapTiles[tile].x + scl && mY > mapTiles[tile].y && mY < mapTiles[tile].y + scl);//Are we clicking on the tile
+}//isCursorOnTileNoFV() END
 
 function updateTileLocation(tile){//Adjust XY location of tile
 	mapTiles[tile].x = mX + offsetX;//Adjust X location of tile
@@ -347,11 +432,26 @@ function loadTile(tile){
 	tileN = mapTiles[tile].image;//Set Red Slider value to Red value of the tile
 }//loadColors() END
 
+function checkImage(tile){
+	for(var i = 0; i < mapTiles.length - 1; i++){//Go through all tiles
+		if(isCursorOnTileNoFV(i)){//Is the mouse cursor on the tile we're checking?
+			if(tile == mapTiles[i].image){//Is the tile image we're on the same as the one we're trying to place?
+				console.log("False");
+				return false;//Don't place tile
+			}
+		}
+	}
+	console.log("True");
+	return true;//Place tile
+}//checkImage() END
+
 function placeTile(){//Place a tile at the mouses location
 	if(!(mY < scl*2 + pY + fV) && mY < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){//We're not on the UI and we're within the screen bounds
 		if(mouseButton == CENTER && !deleting){//We're dragging with the middle button and not deleting
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileBorderNumber,RSlider.value(),GSlider.value(),BSlider.value(), false);//Place a colored tile with no image
 		}else if(mouseButton == LEFT){//We're dragging with the left button
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
+		}else if(mouseButton == RIGHT){//We clicked with the right button
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 		}
 	}
@@ -379,15 +479,40 @@ function mTile(x, y, image, r, g, b, clear){//Tile Object
 function BGFunc(){//The background function
 	this.draw = function(){//Draw the background
 		background(255);//Draw the white background
-		
+
 		//Draw Grid on Screen
-		for(var i = 0; i < cols + 1; i++){//Draw all the column lines
+		strokeWeight(4); // Thicker
+		stroke(255,0,0);//RED
+		line(1, 0, 1, rows*scl);//Draw Verticle lines
+
+		strokeWeight(1); // Default
+		stroke(0);//BLACK
+		for(var i = 1; i < cols + 0; i++){//Draw all the column lines
 			line(scl * i, 0, scl * i, rows*scl);//Draw Verticle lines
 		}//Drew all the column lines
-		
-		for(var i = 0; i < rows + 1; i++){//Draw all the row lines
+
+		strokeWeight(4); // Thicker
+		stroke(255,0,0);//RED
+		line((scl * cols) - 1, 0, (scl * cols) - 1, rows*scl);//Draw Verticle lines
+
+
+		strokeWeight(4); // Thicker
+		stroke(255,0,0);//RED
+		line(0, 1, cols*scl, 1);//Draw Horizontal Lines
+
+		strokeWeight(1); // Default
+		stroke(0);//BLACK
+		for(var i = 1; i < rows + 0; i++){//Draw all the row lines
 			line(0, scl * i, cols*scl, scl * i);//Draw Horizontal Lines
 		}//Drew all the row lines
+
+		strokeWeight(4); // Thicker
+		stroke(255,0,0);//RED
+		line(0, (scl * rows) - 1, cols*scl, (scl * rows) - 1);//Draw Horizontal Lines
+		
+		strokeWeight(1); // Default
+		stroke(0);//BLACK
+
 	}//BGFunc.draw = function() END
 }//BGFunc() END
 
@@ -415,6 +540,8 @@ function tileUI(){//The tile UI
 		RSlider.position(0 + pX, scl+((scl/6)*1) + pY);//Update Red Slider position
 		GSlider.position(0 + pX, scl+((scl/6)*3) + pY);//Update Green Slider position
 		BSlider.position(0 + pX, scl+((scl/6)*5) + pY);//Update Blue Slider position
+		
+		scrollSlider.position((scl*18.5)+(scl/2) + pX, (scl/2) + pY);//Update Scroll Slider position
 		
 		//Update color input box locations
 		RInput.position((scl*5)+(scl/2) + pX, scl+(scl/2.5) + pY);//Update Red Number Input position
@@ -447,6 +574,10 @@ function tileUI(){//The tile UI
 		BSlider.changed(function BSliderC() {BInput.value(this.value());});//The function to run when changed
 		BSlider.style('width', scl*2.8+'px');//Width of slider
 		
+		scrollSlider = createSlider(1,10,5);//(Min, Max, Start)
+		scrollSlider.changed(function scrollSliderC() {scrollAmount = this.value();});//The function to run when changed
+		scrollSlider.style('width', scl*2.8+'px');//Width of slider
+		
 		//Color Input Boxes
 		RInput = createInput(255);//(Start)
 		RInput.input(function RInputC() {RSlider.value(this.value());});//The function to run when changed
@@ -473,7 +604,9 @@ function tileUI(){//The tile UI
 		ClearButton.mousePressed(ClearCanvas);//The function to run when pressed
 		FileSaveButton = createButton('Save File');//Text of button
 		FileSaveButton.mousePressed(FileSaveCanvas);//The function to run when pressed
-		//FileLoadButton = createFileInput(FileLoadCanvas);
+		//FileLoadButton = createFileInput(FileLoadCanvas);//createFileInput 'Load File'
+		//FileLoadButton = createButton('Load File');//createFileInput 'Load File'
+		//FileLoadButton.mousePressed(FileLoadCanvas);//The function to run when pressed
 		NextButton = createButton('Next');//Text of button
 		NextButton.mousePressed(NextButtonC);//The function to run when pressed
 		PrevButton = createButton('Prev');//Text of button
