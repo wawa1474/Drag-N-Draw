@@ -50,24 +50,32 @@ function setup(){//Setup everything
 }//setup() END
 
 function NextButtonC(){//Next Row
+	if(tileN < rowLength*tileRow || tileN > rowLength*tileRow+rowLength){//Is tileN outside of our current row
+		//Do Nothing
+	}else{
+		tileN += rowLength;//Keep the selected tile number in the same relative position
+		if(tileN > totalImages + 1){//If the tile number is greater than our total number of tiles
+			tileN = tileN - (totalImages + 2);//Loop the tile number back to first row in the same relative position
+		}
+	}
 	tileRow++;//Increment the row number
 	if(tileRow > totalImages/rowLength){//If the row number is greater than our total number of rows
 		tileRow = 0;//Loop the row number back to the first
 	}
-	tileN += rowLength;//Keep the selected tile number in the same relative position
-	if(tileN > totalImages + 1){//If the tile number is greater than our total number of tiles
-		tileN = tileN - (totalImages + 2);//Loop the tile number back to first row in the same relative position
-	}
 }//NextButtonC() END
 
 function PrevButtonC(){//Previous Row
+	if(tileN < rowLength*tileRow || tileN > rowLength*tileRow+rowLength){//Is tileN outside of our current row
+		//Do Nothing
+	}else{
+		tileN -= rowLength;//Keep the selected tile number in the same relative position
+		if(tileN < 0){//If the tile number is less than zero
+			tileN = (totalImages + 2) - (0 - tileN);//Loop the tile number back to last row in the same relative position
+		}
+	}
 	tileRow--;//Decrement the row number
 	if(tileRow < 0){//If the row number is less than our zero
 		tileRow = Math.floor(totalImages/rowLength);//Loop the row number back to the last
-	}
-	tileN -= rowLength;//Keep the selected tile number in the same relative position
-	if(tileN < 0){//If the tile number is less than zero
-		tileN = (totalImages + 2) - (0 - tileN);//Loop the tile number back to last row in the same relative position
 	}
 }//PrevButtonC() END
 
@@ -173,10 +181,11 @@ function mousePressed(){//We pressed a mouse button
 				updateOffset(i);//Update the mouse offset of the tile
 				loadColors(i);//Load the color inputs and sliders with the color from the tile
 				return false;//Don't do anything else
-			}else if(mouseButton == RIGHT){
+			}/*else if(mouseButton == RIGHT){
 				loadTile(i);
+				updateTileRow();//Get the row to whatever tile were on
 				return false;
-			}
+			}*/
 		}
 	}//Went through all the tiles
 	
@@ -236,6 +245,7 @@ function mouseReleased(){//We released the mouse button
 
 function keyTyped(){//We typed a key
 	if(key == 'q'){//We pressed 'Q'
+		updateTileRow();//Get the row to whatever tile were on
 		tileN--;//Decrement the tile number
 		if(tileN < 0){//Is the tile number less than zero?
 			tileN = totalImages + 1;//Loop the tile number back to the last tile
@@ -248,6 +258,7 @@ function keyTyped(){//We typed a key
 			}
 		}
 	}else if(key == 'e'){//We pressed 'E'
+		updateTileRow();//Get the row to whatever tile were on
 		tileN++;//Increment the tile number
 		if(tileN > totalImages + 1){//Is the tile number greater than our total number of images?
 			tileN = 0;//Loop the tile number back to the first tile
@@ -279,8 +290,30 @@ function keyTyped(){//We typed a key
 		PrevButtonC();//Previous Tile row
 	}else if(key == 'x'){//We pressed 'X'
 		NextButtonC();//Next Tile Row
+	}else if(key == 'f'){//We pressed 'F'
+		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+			if(isCursorOnTile(i)){//Are we clicking on the tile
+				loadTile(i);//Load tileN with whatever tile we just checked
+				updateTileRow();//Get the row to whatever tile were on
+			}
+		}
 	}
 }//keyTyped() END
+
+function updateTileRow(){//Get the row to whatever tile were on
+	while(Math.floor(tileN/rowLength)*rowLength < rowLength*tileRow){//Is tileN lower than the row were on?
+			tileRow--;//Decrement tileRow
+			if(tileRow < 0){//Is the tile number less than zero?
+				tileRow = Math.floor(totalImages/rowLength);//Loop the tile row back to the last row
+			}
+		}
+		while(Math.floor(tileN/rowLength)*rowLength > rowLength*tileRow){//Is tileN higher than the row were on?
+			tileRow++;//Increment tileRow
+			if(tileRow > totalImages/rowLength){//Is the tile row greater than our total number of rows?
+				tileRow = 0;//Loop the tile row back to the first row
+			}
+		}
+}//updateTileRow() END
 
 function isCursorOnTile(tile){//Is the mouse cursor on the tile we're checking?
 	return(mX > mapTiles[tile].x - fV && mX < mapTiles[tile].x + scl + fV && mY > mapTiles[tile].y - fV && mY < mapTiles[tile].y + scl + fV);//Are we clicking on the tile
