@@ -54,6 +54,10 @@ var fileNameInput;//File Name Input
 var fileName = 'Map1';//File Name
 
 //var loreInputArea;
+var scrollSlider;
+
+var img = [];//Tile Image Array
+var mapTiles = [];//Map Tiles Array
 
 var player = new player();//Player
 
@@ -68,8 +72,6 @@ function preload(){//Preload all of the images
 	
 	player.image = loadImage('assets/Player.png');//Player Image
 	Background = loadImage('assets/Background.png');//Player Image
-	
-	//mapTable = loadTable('MAP.csv', 'csv', 'header');//Load the csv
 }//preload() END
 
 function setup(){//Setup everything
@@ -131,6 +133,7 @@ function FileSaveCanvas(){//Save the Canvas to a file
 		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
 	}//Went through all the tiles
 	save('MapCanvas.png');//Save the map to a PNG file
+
 	FileSaveMap();//save map to file
 }//FileSaveCanvas() END
 
@@ -185,6 +188,64 @@ function FileLoadMap2(table){//Load the Map from file
 												  CLEAR);//,//Is Tile Clear
 												  //mapTable.get(i,'lore'));//Tile LORE?
 	}
+
+	//var MapJSON = JSON.stringify(mapTiles);
+	//saveJSON(mapTiles, 'Map2.json');
+}//FileSaveCanvas() END
+
+function LoadCanvas(){//Load the canvas from local storage
+	mapTiles = JSON.parse(localStorage.getItem("MapJSON"));//Set the map array
+	if(mapTiles == null){//Is the array null
+		mapTiles = [];//Reset the map array
+	}
+}//LoadCanvas() END
+
+function loadJSON2(callback) {   
+    var xobj = new XMLHttpRequest();
+    xobj.overrideMimeType("application/json");
+    xobj.open('GET', 'mapJSON.json', true); // Replace 'my_data' with the path to your file
+    xobj.onreadystatechange = function () {
+        if (xobj.readyState == 4 && xobj.status == "200") {
+			// Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+			callback(xobj.responseText);
+        }
+    };
+    xobj.send(null);  
+ }
+
+function FileLoadCanvas(file){//Load the canvas from storage
+	//mapTiles = JSON.parse(JSON.stringify(file));//Set the map array
+	console.log("Loading mapJSON.json");
+	var mapJSON;// = loadJSON("mapJSON.json");
+	loadJSON2(function(response) {
+		// Parse JSON string into object
+		mapJSON = JSON.parse(response);
+	});
+	mapJSON = JSON.parse(mapJSON);
+	//var JSONlength = Object.keys(mapJSON).length;
+	//console.log(mapJSON.length);
+	console.log(Object.entries(mapJSON));
+	if(mapJSON != null){
+		mapTiles = [];
+	}
+	for (var key in mapJSON) {
+		if (mapJSON.hasOwnProperty(key)) {
+			console.log(mapJSON[key].x);
+			console.log(mapJSON[key].y);
+		}
+	}
+	for(var i = 0; i < mapJSON.length; i++){
+		//mTile(x, y, image, r, g, b, clear){//Tile Object
+		console.log(mapJSON[i].x);
+		mapTiles[i] = new mTile(mapJSON.properties[i].x,
+												  mapJSON.features[i].properties.y,
+												  mapJSON.features[i].properties.image,
+												  mapJSON.features[i].properties.r,
+												  mapJSON.features[i].properties.g,
+												  mapJSON.features[i].properties.b,
+												  mapJSON.features[i].properties.clear);
+	}
+	console.log(mapTiles);
 	if(mapTiles == null){//Is the array null
 		mapTiles = [];//Reset the map array
 	}
@@ -206,15 +267,19 @@ function updateXY(){//Update the XY position of the mouse and the page XY offset
 }//updateXY() END
 
 function draw(){//Draw the canvas
+
 	drawnTiles = 0;//reset number of drawn tiles
 
 	updateXY();//Update the XY position of the mouse and the page XY offset
 	
 	BG.draw();//Draw the background and grid
 	
+
 	if(window.scrollX != SX || window.scrollY != SY){//if screen is not scrolled to correct place
 		window.scrollTo(Math.floor((SX)/scl) * scl, Math.floor((SY)/scl) * scl)//Make sure the screen stays locked to the grid
 	}
+
+	window.scrollTo(Math.floor((SX)/scl) * scl, Math.floor((SY)/scl) * scl)//Make sure the screen stays locked to the grid
 
 	//If dragging a tile: update location
 	if (dragging){//Are we dragging a tile
@@ -226,6 +291,7 @@ function draw(){//Draw the canvas
 
 	//Display Map Tiles
 	for(var i = 0; i < mapTiles.length; i++){//Go through all the tiles
+
 		if(mapTiles[i].x > pX - scl && mapTiles[i].x  < windowWidth + pX && mapTiles[i].y > pY && mapTiles[i].y < windowHeight + pY || drawAll == true){//if tile is within screen bounds or drawAll is set
 			if(!mapTiles[i].clear || mapTiles[i].image == 0){//Is the tile colored
 				fill(mapTiles[i].r,mapTiles[i].g,mapTiles[i].b);//Set Tile background color
@@ -236,6 +302,12 @@ function draw(){//Draw the canvas
 			}
 		drawnTiles++;//how tiles are being drawn?
 		}
+
+		if(!mapTiles[i].clear){//Is the tile colored
+			fill(mapTiles[i].r,mapTiles[i].g,mapTiles[i].b);//Set Tile background color
+			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);//Draw colored square behind tile
+		}
+		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
 	}//Went through all the tiles
 
 	BG.border();//Draw the RED border
@@ -252,6 +324,7 @@ function draw(){//Draw the canvas
 
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
+
 	if(tilePlaceSquareCount == 2){//placing group of tiles
 		if(mouseButton == LEFT){//We clicked with the left button
 			placeTileSquare('left');//placing image tiles
@@ -286,7 +359,10 @@ function mousePressed(){//We pressed a mouse button
 	for(var i = 0; i < rowLength; i++){//Go through all the tiles in the row
 		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && mY > 0 + pY + fV && mY < scl + pY - fV){//Are we clicking on the tile UI
 			noTile = true;//Dont allow tile placement
+
 			if(img[rowLength*tileRow+i] == null){return;}//if image doesn't exist return
+
+			if(img[rowLength*tileRow+i] == null){return;}
 			tileN = rowLength*tileRow+i;//Set the tile cursor to the tile we clicked on
 			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Create a tile
 		}
@@ -313,6 +389,7 @@ function mousePressed(){//We pressed a mouse button
 				return false;//Block normal action
 			}/*else if(mouseButton == RIGHT){//We clicked with the right button
 				mylog.log("Right");
+			}/*else if(mouseButton == RIGHT){
 				//loadTile(i);
 				//updateTileRow();//Get the row to whatever tile were on
 				//return false;
@@ -327,7 +404,7 @@ function mousePressed(){//We pressed a mouse button
 
 function mouseDragged(){//We dragged the mouse while holding a button
 	//updateXY();
-	
+
 	if(mouseButton == RIGHT){//We clicked with the right button
 		for(var i = 0; i <= mapTiles.length-1; i++){//loop through all the tiles
 			if(isCursorOnTile(i)){//Are we clicking on the tile
@@ -391,9 +468,9 @@ function mouseReleased(){//We released the mouse button
 
 function keyPressed(){//We pressed a key
 	//console.log(keyCode);//What key did we press?
-	if (keyCode == /*SHIFT*/16){//We pressed shift
+	if (keyCode == 16){//We pressed shift
 		PrevButtonC();//Previous Tile row
-	}else if (keyCode == /*SPACE*/32){//We pressed space
+	}else if (keyCode == 32){//We pressed space
 		NextButtonC();//Next Tile Row
 		return false;//Block normal action
 	}else if (keyCode == 40){//We pressed down
@@ -524,6 +601,7 @@ function isCursorOnTile(tile){//Is the mouse cursor on the tile we're checking?
 	return(mX > mapTiles[tile].x - fV && mX < mapTiles[tile].x + scl + fV && mY > mapTiles[tile].y - fV && mY < mapTiles[tile].y + scl + fV);//Are we clicking on the tile
 }//isCursorOnTile() END
 
+
 function isCursorOnTileXY(tile, tX, tY){//Is the mouse cursor on the tile we're checking?
 	return(tX > mapTiles[tile].x - fV && tX < mapTiles[tile].x + scl + fV && tY > mapTiles[tile].y - fV && tY < mapTiles[tile].y + scl + fV);//Are we clicking on the tile
 }//isCursorOnTile() END
@@ -531,6 +609,7 @@ function isCursorOnTileXY(tile, tX, tY){//Is the mouse cursor on the tile we're 
 function isCursorOnTileNoFV(tile){//Is the mouse cursor on the tile we're checking?
 	return(mX > mapTiles[tile].x && mX < mapTiles[tile].x + scl && mY > mapTiles[tile].y && mY < mapTiles[tile].y + scl);//Are we clicking on the tile
 }//isCursorOnTileNoFV() END
+
 
 function isCursorOnTileNoFVXY(tile, tX, tY){//Is the mouse cursor on the tile we're checking?
 	return(tX > mapTiles[tile].x && tX < mapTiles[tile].x + scl && tY > mapTiles[tile].y && tY < mapTiles[tile].y + scl);//Are we clicking on the tile
@@ -569,6 +648,7 @@ function checkImage(tile){//check if tile about to place has same image as tile 
 		if(isCursorOnTile(i)){//Is the mouse cursor on the tile we're checking?
 			if(tile == mapTiles[i].image){//Is the tile image we're on the same as the one we're trying to place?
 				//mylog.log("False", "Image", i, ", ", mapTiles[i].image, ", ", tile);
+				//console.log("False");
 				return false;//Don't place tile
 			}
 		}
@@ -599,6 +679,7 @@ function placeTile(){//Place a tile at the mouses location
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 		}else if(mouseButton == RIGHT){//We clicked with the right button
 			//mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 		}
 	}
 	//console.log(mapTiles.length);//How many tiles are there?
@@ -671,7 +752,7 @@ function deleteTile(tile){//Delete a tile and update the array
 	//console.log(mapTiles.length);//How many tiles are there?
 }//deleteTile() END
 
-function mTile(x, y, image, r, g, b, clear, lore){//Tile Object
+function mTile(x, y, image, r, g, b, clear){//Tile Object
 	this.x = x;//Store X Position
 	this.y = y;//Store Y Position
 	this.image = image;//Store Image Number
@@ -687,10 +768,11 @@ function BGFunc(){//The background function
 		background(255);//Draw the white background
 
 		//Draw Grid on Screen
+
 		/*for(var i = 1; i < cols + 0; i++){//Draw all the column lines
 			line(scl * i, 0, scl * i, rows*scl);//Draw Verticle lines
 		}//Drew all the column lines
-
+		
 		for(var i = 1; i < rows + 0; i++){//Draw all the row lines
 			line(0, scl * i, cols*scl, scl * i);//Draw Horizontal Lines
 		}//Drew all the row lines*/
@@ -707,7 +789,9 @@ function BGFunc(){//The background function
 		line(0, (scl * rows) - 1, cols*scl, (scl * rows) - 1);//Draw Horizontal Lines
 		strokeWeight(1); // Default
 		stroke(0);//BLACK
+
 	}//BGFunc.border = function() END
+
 }//BGFunc() END
 
 function tileUI(){//The tile UI
@@ -715,11 +799,10 @@ function tileUI(){//The tile UI
 	this.draw = function(){//Draw the UI
 		fill(RSlider.value(),GSlider.value(),BSlider.value());//Set background color to the RGB value set by user
 		rect(0 + pX, scl + pY, scl*3, scl);//Display color behind RGB Sliders
-		
 		fill(255);//Set background color to white
 		rect(pX, pY, scl*rowLength, scl);//Create rectangle behind tiles UI
 		for(var i = 0; i < rowLength; i++){//Go through all the tiles
-			if(rowLength*tileRow+i <= totalImages){//If tile exists
+			if(rowLength*tileRow+i <= totalImages+1){//If tile exists
 				if(rowLength*tileRow+i == tileN){//If displaying selected tile
 					fill(RSlider.value(),GSlider.value(),BSlider.value());//Set background color to the RGB value set by user
 					rect(scl*i + pX, pY, scl, scl);//Display color behind the tile
@@ -728,6 +811,7 @@ function tileUI(){//The tile UI
 			}
 		}//Went through all the tiles
 		
+
 		fill(255,0,0);//red text
 		stroke(0);//no outline
 		textSize(24);//larger text size
@@ -744,7 +828,6 @@ function tileUI(){//The tile UI
 		RSlider.position(0 + pX, scl+((scl/6)*1) + pY);//Update Red Slider position
 		GSlider.position(0 + pX, scl+((scl/6)*3) + pY);//Update Green Slider position
 		BSlider.position(0 + pX, scl+((scl/6)*5) + pY);//Update Blue Slider position
-		
 		scrollSlider.position((scl*18.5)+(scl/2) + pX, (scl/2) + pY);//Update Scroll Slider position
 		
 		//Update color input box locations
@@ -764,8 +847,10 @@ function tileUI(){//The tile UI
 		FileLoadButton.position((scl*16.75)+(scl/2) + pX, scl+(scl/2.5) + pY);//Update File Load button location
 		NextButton.position(scl*(rowLength+1.7) + pX, (scl/2.5) + pY);//Update Next Button position
 		PrevButton.position(scl*(rowLength+.35) + pX, (scl/2.5) + pY);//Update Previous Button position
-		
 		fileNameInput.position((scl*18.1)+(scl/2) + pX, scl+(scl/2.5) + pY);//File Name Input Position
+		//FileLoadButton.position((scl*19.5)+(scl/2) + pX, scl+(scl/2) + pY);//Update File Load button location
+		NextButton.position(scl*(rowLength+1.7) + pX, (scl/2.5) + pY);//Update Next Button position
+		PrevButton.position(scl*(rowLength+.35) + pX, (scl/2.5) + pY);//Update Previous Button position
 	}//tileUI.update() END
 	
 	this.setup = function(){//Setup the UI
@@ -779,7 +864,6 @@ function tileUI(){//The tile UI
 		BSlider = createSlider(0,255,127);//(Min, Max, Start)
 		BSlider.changed(function BSliderC() {BInput.value(this.value());});//The function to run when changed
 		BSlider.style('width', scl*2.8+'px');//Width of slider
-		
 		scrollSlider = createSlider(1,10,5);//(Min, Max, Start)
 		scrollSlider.changed(function scrollSliderC() {scrollAmount = this.value();});//The function to run when changed
 		scrollSlider.style('width', scl*2.8+'px');//Width of slider
@@ -813,15 +897,17 @@ function tileUI(){//The tile UI
 		//FileLoadButton = createFileInput(FileLoadMap);//createFileInput 'Load File'
 		FileLoadButton = createButton('File');//createFileInput 'Load File'
 		FileLoadButton.mousePressed(FileLoadMap);//The function to run when pressed
+		//FileLoadButton = createFileInput(FileLoadCanvas);//createFileInput 'Load File'
+		//FileLoadButton = createButton('Load File');//createFileInput 'Load File'
+		//FileLoadButton.mousePressed(FileLoadCanvas);//The function to run when pressed
 		NextButton = createButton('Next');//Text of button
 		NextButton.mousePressed(NextButtonC);//The function to run when pressed
 		PrevButton = createButton('Prev');//Text of button
 		PrevButton.mousePressed(PrevButtonC);//The function to run when pressed
-		
 		fileNameInput = createInput(fileName);
 		fileNameInput.input(function fileNameInputF(){fileName = this.value(); /* console.log(this.value()); */});
-		
 		//loreInputArea = createElememt('textarea', 'Some text to start initially.');
+
 	}//tileUI.setup() END
 }//tileUI() END
 
