@@ -1,4 +1,6 @@
 var dragging = false; // Is the object being dragged?
+var deleting = false;//Are we deleting tiles?
+var notile = false;//Are we blocking placement of tiles?
 
 var MapN = 0;//Which map peice are we messing with
 var TileN = 0;//Which tile is the cursor over
@@ -18,12 +20,14 @@ var rows = 100;//Rows
 
 
 var SX = SY = 0;
-var mX, mY;
+var mX, mY, pX, pY;
+var fV = 1;
 var scrollamount = 5;
 
 var img = [];
 var mapTiles = [];
-var TilesJSON;
+
+var tileT = 0;
 
 
 function preload() {
@@ -73,30 +77,21 @@ function setup() {
 
 function SaveCanvas(){
 	//save('MapCanvas.png');
-	TilesJSON = [];
-	for(var i = 0; i < mapTiles.length; i++){
-		TilesJSON[i] = new mTilesJSON(mapTiles[i].x, mapTiles[i].y, mapTiles[i].image, red(mapTiles[i].color), green(mapTiles[i].color), blue(mapTiles[i].color), mapTiles[i].clear);
-	}
-	var MapJSON = JSON.stringify(TilesJSON);
+	var MapJSON = JSON.stringify(mapTiles);
 	//save(MapJSON, 'Map.json');
 	localStorage.setItem("MapJSON", MapJSON);
 	//localStorage.removeItem("MapJSON");
-	TilesJSON = [];
 }
 
 function LoadCanvas(){
-	TilesJSON = JSON.parse(localStorage.getItem("MapJSON"));
-	console.log(TilesJSON);
-	mapTiles = [];
-	for(var i = 0; i < TilesJSON.length; i++){
-		mapTiles[i] = new mTile(TilesJSON[i].x, TilesJSON[i].y, TilesJSON[i].image, color(TilesJSON[i].r, TilesJSON[i].g, TilesJSON[i].b), TilesJSON[i].clear);
+	mapTiles = JSON.parse(localStorage.getItem("MapJSON"));
+	if(mapTiles == null){
+		mapTiles = [];
 	}
-	TilesJSON = [];
 }
 
 function DeleteCanvas(){
 	localStorage.removeItem("MapJSON");
-	TilesJSON = [];
 	//mapTiles = [];
 }
 
@@ -108,16 +103,21 @@ function ClearCanvas(){
 
 
 function draw() {
+	mX = mouseX;
+	my = mouseY;
+	pX = window.pageXOffset;
+	pY = window.pageYOffset;
+	
 	background(255);
 	
 	window.scrollTo(Math.floor((SX)/scl) * scl, Math.floor((SY)/scl) * scl)//window.pageXOffset, Math.floor(window.pageYOffset/scl) * scl);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	CCheckBox.position((scl*6)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
-	SaveButton.position((scl*11.5)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
-	LoadButton.position((scl*13)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
-	DeleteButton.position((scl*14.5)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
-	ClearButton.position((scl*16)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
+	CCheckBox.position((scl*6)+(scl/2) + pX, scl+(scl/2) + pY);
+	SaveButton.position((scl*11.5)+(scl/2) + pX, scl+(scl/2) + pY);
+	LoadButton.position((scl*13)+(scl/2) + pX, scl+(scl/2) + pY);
+	DeleteButton.position((scl*14.5)+(scl/2) + pX, scl+(scl/2) + pY);
+	ClearButton.position((scl*16)+(scl/2) + pX, scl+(scl/2) + pY);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,8 +132,8 @@ function draw() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Adjust location if being dragged
 	if (dragging) {
-		mapTiles[mapN].x = mouseX + offsetX;
-		mapTiles[mapN].y = mouseY + offsetY;
+		mapTiles[mapN].x = mX + offsetX;
+		mapTiles[mapN].y = my + offsetY;
 	}/*else{
 		if(mouseButton == LEFT){
 			for(var i = mapTiles.length-1; i >= 0; i--){
@@ -148,7 +148,7 @@ function draw() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for(var i = 0; i < mapTiles.length; i++){//Display Map Tiles
 		if(!mapTiles[i].clear){
-			fill(mapTiles[i].color);
+			fill(mapTiles[i].r,mapTiles[i].g,mapTiles[i].b);
 			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);
 		}
 		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);
@@ -156,16 +156,16 @@ function draw() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	RSlider.position(scl*3 + window.pageXOffset, scl+((scl/6)*1) + window.pageYOffset);
-	GSlider.position(scl*3 + window.pageXOffset, scl+((scl/6)*3) + window.pageYOffset);
-	BSlider.position(scl*3 + window.pageXOffset, scl+((scl/6)*5) + window.pageYOffset);
-	RInput.position((scl*8)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
-	GInput.position((scl*9)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
-	BInput.position((scl*10)+(scl/2) + window.pageXOffset, scl+(scl/2) + window.pageYOffset);
+	RSlider.position(scl*3 + pX, scl+((scl/6)*1) + pY);
+	GSlider.position(scl*3 + pX, scl+((scl/6)*3) + pY);
+	BSlider.position(scl*3 + pX, scl+((scl/6)*5) + pY);
+	RInput.position((scl*8)+(scl/2) + pX, scl+(scl/2) + pY);
+	GInput.position((scl*9)+(scl/2) + pX, scl+(scl/2) + pY);
+	BInput.position((scl*10)+(scl/2) + pX, scl+(scl/2) + pY);
 	
 	fill(RSlider.value(),GSlider.value(),BSlider.value());
 	//rect(scl*2 + window.pageXOffset, scl + window.pageYOffset, scl*4, scl);
-	rect(scl*3 + window.pageXOffset, scl + window.pageYOffset, scl*3, scl);
+	rect(scl*3 + pX, scl + pY, scl*3, scl);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,9 +191,9 @@ function draw() {
 	for(var i = 0; i < img.length - 2; i++){//Pickable Tiles
 		if(i == TileN){
 			fill(RSlider.value(),GSlider.value(),BSlider.value());
-			rect(scl*i + window.pageXOffset, window.pageYOffset, scl, scl);
+			rect(scl*i + pX, pY, scl, scl);
 		}
-		image(img[i], scl*i + window.pageXOffset, window.pageYOffset);
+		image(img[i], scl*i + pX, pY);
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -213,12 +213,27 @@ function draw() {
 	
 	//image(img[img.length-2], scl, scl + window.pageYOffset);//Trash Can
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if(tileT != mapTiles.length){
+		tileT = mapTiles.length;
+		console.log(tileT);
+	}
 }
 
 function mousePressed() {
+	mX = mouseX;
+	my = mouseY;
+	pX = window.pageXOffset;
+	pY = window.pageYOffset;
+	
+	if(mX > scl*3 + pX && mX < scl*6 + pX && my > scl + pY && my < scl*2 + pY){
+		notile = true;
+		return;
+	}
+
 	for(var i = 0; i < img.length; i++){
-		if(mouseX > scl*i + window.pageXOffset && mouseX < scl*(i+1) + window.pageXOffset && mouseY > 0 + window.pageYOffset && mouseY < scl + window.pageYOffset){
-			mapTiles[mapTiles.length] = new mTile(scl*i + window.pageXOffset,0 + window.pageYOffset,i,color(RSlider.value(),GSlider.value(),BSlider.value()), CClear);
+		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && my > 0 + pY + fV && my < scl + pY - fV){
+			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
+			TileN = i;
 		}
 	}
 	/*if(mouseX > scl*2 + window.pageXOffset && mouseX < scl*3 + window.pageXOffset && mouseY > scl + window.pageYOffset && mouseY < scl*2 + window.pageYOffset){
@@ -226,7 +241,7 @@ function mousePressed() {
 	}*/
 	// Did I click on the rectangle?
 	for(var i = mapTiles.length-1; i >= 0; i--){
-		if(mouseX > mapTiles[i].x && mouseX < mapTiles[i].x + scl && mouseY > mapTiles[i].y && mouseY < mapTiles[i].y + scl){
+		if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV){
 			if(mouseButton == CENTER){
 				if(mapTiles.length > 1){
 					for(var j = i; j < mapTiles.length - 1; j++){
@@ -234,30 +249,32 @@ function mousePressed() {
 					}
 				}
 				mapTiles = shorten(mapTiles);
+				deleting = true;
 				return false;
 			}else{
 				mapN = i;
 				dragging = true;
 				// If so, keep track of relative location of click to corner of rectangle
-				offsetX = mapTiles[i].x-mouseX;
-				offsetY = mapTiles[i].y-mouseY;
-				RSlider.value(red(mapTiles[i].color));
-				GSlider.value(green(mapTiles[i].color));
-				BSlider.value(blue(mapTiles[i].color));
-				RInput.value(red(mapTiles[i].color));
-				GInput.value(green(mapTiles[i].color));
-				BInput.value(blue(mapTiles[i].color));
+				offsetX = mapTiles[i].x-mX;
+				offsetY = mapTiles[i].y-my;
+				RSlider.value(mapTiles[i].r);
+				GSlider.value(mapTiles[i].g);
+				BSlider.value(mapTiles[i].b);
+				RInput.value(mapTiles[i].r);
+				GInput.value(mapTiles[i].g);
+				BInput.value(mapTiles[i].b);
 				return false;
 			}
 		}
 	}
-	if(!(mouseY < scl*2 + window.pageYOffset) && mouseY < (windowHeight - (scl*1.5)) + window.pageYOffset && mouseX < (windowWidth - (scl)) + window.pageXOffset){
+	if(!(my < scl*2 + pY) && my < (windowHeight - (scl*1.5)) + pY && mX < (windowWidth - (scl)) + pX){
 		if(mouseButton == CENTER){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mouseX/scl)*scl,Math.floor(mouseY/scl)*scl,img.length-1,color(RSlider.value(),GSlider.value(),BSlider.value()), false);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,img.length-1,RSlider.value(),GSlider.value(),BSlider.value(), false);
 			//console.log(mapTiles[mapTiles.length-1].color);
+			deleting = false;
 		}
 		if(mouseButton == LEFT){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mouseX/scl)*scl,Math.floor(mouseY/scl)*scl,TileN,color(RSlider.value(),GSlider.value(),BSlider.value()), CClear);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,TileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 			//console.log(mapTiles[mapTiles.length-1].color);
 		}
 	}
@@ -267,21 +284,27 @@ function mousePressed() {
 function mouseDragged(){
 	mX = mouseX;
 	my = mouseY;
-	for(var i = mapTiles.length-1; i >= 0; i--){
-		if(mX > mapTiles[i].x && mX < mapTiles[i].x + scl && my > mapTiles[i].y && my < mapTiles[i].y + scl){
-			return;
-		}
-	}
-	if(dragging){
+	pX = window.pageXOffset;
+	pY = window.pageYOffset;
+
+	if(notile){
 		return;
 	}
-	if(!(my < scl*2 + window.pageYOffset) && my < (windowHeight - (scl*1.5)) + window.pageYOffset && mX < (windowWidth - (scl)) + window.pageXOffset){
-		if(mouseButton == CENTER){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,img.length-1,color(RSlider.value(),GSlider.value(),BSlider.value()), false);
-			//console.log(mapTiles[mapTiles.length-1].color);
+	if(dragging){
+		return false;
+	}
+	for(var i = mapTiles.length-1; i >= 0; i--){
+		if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV){
+			return false;
 		}
-		if(mouseButton == LEFT){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,TileN,color(RSlider.value(),GSlider.value(),BSlider.value()), CClear);
+	}
+
+	if(!(my < scl*2 + pY + fV) && my < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){
+		if(mouseButton == CENTER && !deleting){
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,img.length-1,RSlider.value(),GSlider.value(),BSlider.value(), false);
+			//console.log(mapTiles[mapTiles.length-1].color);
+		}else if(mouseButton == LEFT){
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,TileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 			//console.log(mapTiles[mapTiles.length-1].color);
 		}
 	}
@@ -295,6 +318,7 @@ function mouseReleased() {
 		mapTiles[mapN].y = Math.floor(mouseY / scl) * scl;
 	}
 	dragging = false;
+	notile = false;
 }
 
 function keyTyped() {
@@ -321,22 +345,16 @@ function keyTyped() {
 	}else if(key == 'c'){
 		if(CClear){
 			CClear = false;
+			CCheckBox.checked(false);
 		}else{
 			CClear = true;
+			CCheckBox.checked(true);
 		}
 	}
 	//console.log(TileN);
 }
 
-function mTile(x, y, image, color, clear) {
-	this.x = x;
-	this.y = y;
-	this.image = image;
-	this.color = color;
-	this.clear = clear;
-}
-
-function mTilesJSON(x, y, image, r, g, b, clear) {
+function mTile(x, y, image, r, g, b, clear) {
 	this.x = x;
 	this.y = y;
 	this.image = image;
