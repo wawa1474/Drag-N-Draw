@@ -5,7 +5,7 @@ var deleting = false;//Are we deleting tiles?
 var noTile = false;//Are we blocking placement of tiles?
 
 var mapN = 0;//Which map peice are we messing with
-var totalImages = 54;//Total Images
+var totalImages = 39;//Total Images
 var RSlider, GSlider, BSlider;//RGB Sliders
 var RInput, GInput, BInput;//RGB number Inputs
 var CCheckBox, CClear;//Clear Checkbox
@@ -42,16 +42,16 @@ var mapTable;//Map Table
 var fileNameInput;//File Name Input
 var fileName = 'Map1';//File Name
 
+//var loreInputArea;
+
 var player = new player();//Player
 
 var UI = new tileUI();//Create a UI
 var BG = new BGFunc();//Create a background
 
 function preload(){//Preload all of the images
-	img[tileBorderNumber] = loadImage('assets/Border.png');//Border for Color
-	
 	for(var i = 0; i <= totalImages; i++){//Go through all the images
-		img[i+1] = loadImage('assets/' + i + '.png');//And load them
+		img[i] = loadImage('assets/' + i + '.png');//And load them
 	}//Went through all the images
 	
 	player.image = loadImage('assets/Player.png');//Player Image
@@ -130,6 +130,7 @@ function FileSaveMap(){//Save the Map to file
 	mapTable.addColumn('g');//Tile Green amount
 	mapTable.addColumn('b');//Tile Blue amount
 	mapTable.addColumn('clear');//Is Tile Clear
+	//mapTable.addColumn('lore');//Tile LORE?
 	var newRow;
 	for(var i = 0; i < mapTiles.length - 1; i++){
 		newRow = mapTable.addRow();//Add a row to table
@@ -144,6 +145,7 @@ function FileSaveMap(){//Save the Map to file
 			CLEAR = 0;
 		}
 		newRow.set('clear',CLEAR);//Is Tile Clear
+		//newRow.set('lore',mapTiles[i].lore);//Tile LORE?
 	}
 	saveTable(mapTable, fileName + '.csv');//Save the Map to a CSV file
 	mapTable = null;//Clear the Table
@@ -167,7 +169,8 @@ function FileLoadMap2(table){//Load the Map from file
 												  int(mapTable.get(i,'r')),//Tile Red amount
 												  int(mapTable.get(i,'g')),//Tile Green amount
 												  int(mapTable.get(i,'b')),//Tile Blue amount
-												  CLEAR);//Is Tile Clear
+												  CLEAR);//,//Is Tile Clear
+												  //mapTable.get(i,'lore'));//Tile LORE?
 	}
 	if(mapTiles == null){//Is the array null
 		mapTiles = [];//Reset the map array
@@ -322,9 +325,9 @@ function mouseReleased(){//We released the mouse button
 
 function keyPressed(){//We pressed a key
 	//console.log(keyCode);//What key did we press?
-	if (keyCode == 16){//We pressed shift
+	if (keyCode == /*SHIFT*/16){//We pressed shift
 		PrevButtonC();//Previous Tile row
-	}else if (keyCode == 32){//We pressed space
+	}else if (keyCode == /*SPACE*/32){//We pressed space
 		NextButtonC();//Next Tile Row
 		return false;//Block normal action
 	}else if (keyCode == 40){//We pressed down
@@ -411,6 +414,16 @@ function keyTyped(){//We typed a key
 	}else if(key == 'l'){//We pressed 'L'
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
 			mapTiles[i].x += scl * scrollAmount;//Move tile right 1 space
+		}
+	}else if(key == 'r'){//We pressed 'R'
+		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+			if(isCursorOnTile(i)){//Are we clicking on the tile
+				console.log('Tile #: ' + i + ', X Position: ' + mapTiles[i].x + ', Y Position: ' + mapTiles[i].y + ', Red Amount: ' + mapTiles[i].r + ', Green Amount: ' + mapTiles[i].g + ', Blue Amount: ' + mapTiles[i].b + ', Tile Image #: ' + mapTiles[i].image + ', Is Tile Clear: ' + mapTiles[i].clear + ', Tile Lore: ' + mapTiles[i].lore);
+				//console.log('Tile #: ' + i + ', X Position: ' + mapTiles[i].x + ', Y Position: ' + mapTiles[i].y);
+				//console.log('Red Amount: ' + mapTiles[i].r + ', Green Amount: ' + mapTiles[i].g + ', Blue Amount: ' + mapTiles[i].b);
+				//console.log('Tile Image #: ' + mapTiles[i].image + ', Is Tile Clear: ' + mapTiles[i].clear);
+				//console.log('Tile Lore: ' + mapTiles[i].lore);
+			}
 		}
 	}
 }//keyTyped() END
@@ -503,7 +516,7 @@ function deleteTile(tile){//Delete a tile and update the array
 	//console.log(mapTiles.length);//How many tiles are there?
 }//deleteTile() END
 
-function mTile(x, y, image, r, g, b, clear){//Tile Object
+function mTile(x, y, image, r, g, b, clear, lore){//Tile Object
 	this.x = x;//Store X Position
 	this.y = y;//Store Y Position
 	this.image = image;//Store Image Number
@@ -511,6 +524,7 @@ function mTile(x, y, image, r, g, b, clear){//Tile Object
 	this.g = g;//Store Green Value
 	this.b = b;//Store Blue Value
 	this.clear = clear;//Is the tile clear
+	//this.lore = lore || 0;//The LORE? of the tile
 }//mTile() END
 
 function BGFunc(){//The background function
@@ -548,7 +562,7 @@ function tileUI(){//The tile UI
 		fill(255);//Set background color to white
 		rect(pX, pY, scl*rowLength, scl);//Create rectangle behind tiles UI
 		for(var i = 0; i < rowLength; i++){//Go through all the tiles
-			if(rowLength*tileRow+i <= totalImages+1){//If tile exists
+			if(rowLength*tileRow+i <= totalImages){//If tile exists
 				if(rowLength*tileRow+i == tileN){//If displaying selected tile
 					fill(RSlider.value(),GSlider.value(),BSlider.value());//Set background color to the RGB value set by user
 					rect(scl*i + pX, pY, scl, scl);//Display color behind the tile
@@ -643,7 +657,9 @@ function tileUI(){//The tile UI
 		PrevButton.mousePressed(PrevButtonC);//The function to run when pressed
 		
 		fileNameInput = createInput(fileName);
-		fileNameInput.input(function fileNameInputF(){fileName = this.value(); console.log(this.value());});
+		fileNameInput.input(function fileNameInputF(){fileName = this.value(); /* console.log(this.value()); */});
+		
+		//loreInputArea = createElememt('textarea', 'Some text to start initially.');
 	}//tileUI.setup() END
 }//tileUI() END
 
