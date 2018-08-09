@@ -11,7 +11,7 @@ var SaveButton, LoadButton, DeleteButton, ClearButton, FileSaveButton, FileLoadB
 var NextButton, PrevButton;//Next and Previous row buttons
 var RowLength = 16;//How many tiles per row?
 var TileRow = 0;//Which row of tiles are we looking at?
-var TileN = 0;//Which tile is the cursor over?
+var TileN = 1;//Which tile is the cursor over?
 
 var offsetX = 0, offsetY = 0;    // Mouseclick offset
 
@@ -89,22 +89,34 @@ function setup() {
 	//FileLoadButton = createFileInput(FileLoadCanvas);
 	
 	NextButton = createButton('Next');
-	NextButton.mousePressed(function NextButtonC() {
+	NextButton.mousePressed(NextButtonC);
+	
+	PrevButton = createButton('Prev');
+	PrevButton.mousePressed(PrevButtonC);
+	
+}
+
+function NextButtonC() {
 		TileRow++;
 		if(TileRow > Timg/RowLength){
 			TileRow = 0;
 		}
-	});
-	
-	PrevButton = createButton('Prev');
-	PrevButton.mousePressed(function PrevButtonC() {
+		TileN += RowLength;
+		if(TileN > Timg + 1){
+			TileN = TileN - (Timg + 2);
+		}
+	}
+
+function PrevButtonC() {
 		TileRow--;
 		if(TileRow < 0){
 			TileRow = Math.floor(Timg/RowLength);
 		}
-	});
-	
-}
+		TileN -= RowLength;
+		if(TileN < 0){
+			TileN = (Timg + 2) - (0 - TileN);
+		}
+	}
 
 
 function SaveCanvas(){
@@ -160,12 +172,12 @@ function draw() {
 	window.scrollTo(Math.floor((SX)/scl) * scl, Math.floor((SY)/scl) * scl)//window.pageXOffset, Math.floor(window.pageYOffset/scl) * scl);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	CCheckBox.position((scl*6)+(scl/2) + pX, scl+(scl/2) + pY);
-	SaveButton.position((scl*11.5)+(scl/2) + pX, scl+(scl/2) + pY);
-	LoadButton.position((scl*13)+(scl/2) + pX, scl+(scl/2) + pY);
-	DeleteButton.position((scl*14.5)+(scl/2) + pX, scl+(scl/2) + pY);
-	ClearButton.position((scl*16)+(scl/2) + pX, scl+(scl/2) + pY);
-	FileSaveButton.position((scl*17.5)+(scl/2) + pX, scl+(scl/2) + pY);
+	CCheckBox.position((scl*3)+(scl/2) + pX, scl+(scl/2.2) + pY);
+	SaveButton.position((scl*8.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
+	LoadButton.position((scl*10)+(scl/2) + pX, scl+(scl/2.5) + pY);
+	DeleteButton.position((scl*11.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
+	ClearButton.position((scl*13)+(scl/2) + pX, scl+(scl/2.5) + pY);
+	FileSaveButton.position((scl*14.5)+(scl/2) + pX, scl+(scl/2.5) + pY);
 	//FileLoadButton.position((scl*19.5)+(scl/2) + pX, scl+(scl/2) + pY);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -197,16 +209,16 @@ function draw() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	RSlider.position(scl*3 + pX, scl+((scl/6)*1) + pY);
-	GSlider.position(scl*3 + pX, scl+((scl/6)*3) + pY);
-	BSlider.position(scl*3 + pX, scl+((scl/6)*5) + pY);
-	RInput.position((scl*8)+(scl/2) + pX, scl+(scl/2) + pY);
-	GInput.position((scl*9)+(scl/2) + pX, scl+(scl/2) + pY);
-	BInput.position((scl*10)+(scl/2) + pX, scl+(scl/2) + pY);
+	RSlider.position(0 + pX, scl+((scl/6)*1) + pY);
+	GSlider.position(0 + pX, scl+((scl/6)*3) + pY);
+	BSlider.position(0 + pX, scl+((scl/6)*5) + pY);
+	RInput.position((scl*5)+(scl/2) + pX, scl+(scl/2.5) + pY);
+	GInput.position((scl*6)+(scl/2) + pX, scl+(scl/2.5) + pY);
+	BInput.position((scl*7)+(scl/2) + pX, scl+(scl/2.5) + pY);
 	
 	fill(RSlider.value(),GSlider.value(),BSlider.value());
 	//rect(scl*2 + window.pageXOffset, scl + window.pageYOffset, scl*4, scl);
-	rect(scl*3 + pX, scl + pY, scl*3, scl);
+	rect(0 + pX, scl + pY, scl*3, scl);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,14 +292,14 @@ function mousePressed() {
 	pX = window.pageXOffset;
 	pY = window.pageYOffset;
 	
-	if(mX > scl*3 + pX && mX < scl*6 + pX && my > scl + pY && my < scl*2 + pY){
+	if(mX > 0 + pX && mX < scl*(RowLength+3) + pX && my > scl + pY && my < scl*2 + pY){
 		notile = true;
 		return;
 	}
 
 	for(var i = 0; i < RowLength; i++){
 		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && my > 0 + pY + fV && my < scl + pY - fV){
-			//mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
+			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 			notile = true;
 			TileN = RowLength*TileRow+i;
 		}
@@ -345,6 +357,20 @@ function mouseDragged(){
 	my = mouseY;
 	pX = window.pageXOffset;
 	pY = window.pageYOffset;
+	
+	if(mouseButton == CENTER && deleting){
+		for(var i = mapTiles.length-1; i >= 0; i--){
+			if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV){
+				if(mapTiles.length > 1){
+					for(var j = i; j < mapTiles.length - 1; j++){
+						mapTiles[j] = mapTiles[j + 1];
+					}
+				}
+				mapTiles = shorten(mapTiles);
+				//return false;
+			}
+		}
+	}
 
 	if(notile){
 		return;
@@ -353,7 +379,7 @@ function mouseDragged(){
 		return false;
 	}
 	for(var i = mapTiles.length-1; i >= 0; i--){
-		if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV && !CClear){
+		if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV){// && !CClear){
 			return false;
 		}
 	}
@@ -378,15 +404,27 @@ function mouseReleased() {
 	}
 	dragging = false;
 	notile = false;
+
+	for(var i = mapTiles.length-1; i >= 0; i--){
+		if(mapTiles[i].x >= pX && mapTiles[i].x < scl*RowLength + pX && mapTiles[i].y == pY){
+			if(mapTiles.length > 1){
+				for(var j = i; j < mapTiles.length - 1; j++){
+					mapTiles[j] = mapTiles[j + 1];
+				}
+			}
+			mapTiles = shorten(mapTiles);
+			//return false;
+		}
+	}
+	//console.log(mapTiles.length);
 }
 
 function keyTyped() {
 	if(key == 'q'){
-		if(TileN == 0){
-			TileN = Timg;
+		TileN--;
+		if(TileN < 0){
+			TileN = Timg + 1;
 			TileRow = Math.floor(Timg/RowLength);
-		}else{
-			TileN--;
 		}
 		if(TileN < RowLength*TileRow){
 			TileRow--;
@@ -395,11 +433,10 @@ function keyTyped() {
 			}
 		}
 	}else if(key == 'e'){
-		if(TileN == Timg){
+		TileN++;
+		if(TileN > Timg + 1){
 			TileN = 0;
 			TileRow = 0;
-		}else{
-			TileN++;
 		}
 		if(TileN == RowLength*(TileRow+1)){
 			TileRow++;
@@ -423,6 +460,10 @@ function keyTyped() {
 			CClear = true;
 			CCheckBox.checked(true);
 		}
+	}else if(key == 'z'){
+		PrevButtonC();
+	}else if(key == 'x'){
+		NextButtonC();
 	}
 	//console.log(TileN);
 }
