@@ -1,0 +1,39 @@
+//Created 2018-06-02 13:52:04
+
+Mouse:
+	Left:
+		\-Place Selected Tile
+			|--With Color When Not Clear
+
+		\-Move Tile
+
+	Middle:
+		\-Place Colored Tile
+			|--No Image, Can't Be Clear
+
+		\-Delete Tile
+
+	Right:
+
+
+
+
+
+Keyboard:
+	WASD:
+		\-Move Screen
+	
+	IJKL:
+		\-Move All Tiles
+
+	QE:
+		\-Change Tile
+
+	Z-X/Space-Shift:
+		\-Change Tile Row
+
+	F:
+		\-Copy Tile
+
+	C:
+		\-Toggle Tile Clear
