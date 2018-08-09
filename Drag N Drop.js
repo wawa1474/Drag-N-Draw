@@ -17,7 +17,7 @@ var cols = 100;//Columns
 var rows = 100;//Rows
 
 
-var SX = SY = x = y = 0;
+var SX = SY = 0;
 var scrollamount = 5;
 
 var img = [];
@@ -109,25 +109,65 @@ function ClearCanvas(){
 function draw() {
 	background(255);
 	
-	//kludge++;
-	//if(kludge > 30){
-		window.scrollTo(Math.floor((SX)/scl) * scl, Math.floor((SY)/scl) * scl)//window.pageXOffset, Math.floor(window.pageYOffset/scl) * scl);
-		//kludge = 0;
-	//}
+	window.scrollTo(Math.floor((SX)/scl) * scl, Math.floor((SY)/scl) * scl)//window.pageXOffset, Math.floor(window.pageYOffset/scl) * scl);
 	
-	for(var i = 0; i < mapTiles.length; i++){
-		if(!dragging){
-			if(mapTiles[i].x == scl && mapTiles[i].y == scl + window.pageYOffset){
-				if(mapTiles.length > 1){
-					for(var j = i; j < mapTiles.length - 1; j++){
-						mapTiles[j] = mapTiles[j + 1];
-					}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	CCheckBox.position((scl*6)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	SaveButton.position((scl*11.5)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	LoadButton.position((scl*13)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	DeleteButton.position((scl*14.5)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	ClearButton.position((scl*16)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	for(var i = 0; i < cols + 1; i++){
+		line(scl * i, 0, scl * i, rows*scl);
+	}
+	for(var i = 0; i < rows + 1; i++){
+		line(0, scl * i, cols*scl, scl * i);
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Adjust location if being dragged
+	if (dragging) {
+		mapTiles[mapN].x = mouseX + offsetX;
+		mapTiles[mapN].y = mouseY + offsetY;
+	}/*else{
+		if(mouseButton == LEFT){
+			for(var i = mapTiles.length-1; i >= 0; i--){
+				if(mouseX > mapTiles[i].x && mouseX < mapTiles[i].x + scl && mouseY > mapTiles[i].y && mouseY < mapTiles[i].y + scl){
+					//Hold left mouse or middle mouse and drag to place tiles
 				}
-				mapTiles = shorten(mapTiles);
 			}
 		}
+	}*/
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	for(var i = 0; i < mapTiles.length; i++){//Display Map Tiles
+		if(!mapTiles[i].clear){
+			fill(mapTiles[i].color);
+			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);
+		}
+		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);
 	}
-	for(var i = 0; i < mapTiles.length; i++){
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	RSlider.position(scl*3, scl+((scl/6)*1) + window.pageYOffset);
+	GSlider.position(scl*3, scl+((scl/6)*3) + window.pageYOffset);
+	BSlider.position(scl*3, scl+((scl/6)*5) + window.pageYOffset);
+	RInput.position((scl*8)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	GInput.position((scl*9)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	BInput.position((scl*10)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	
+	fill(RSlider.value(),GSlider.value(),BSlider.value());
+	rect(scl*2, scl + window.pageYOffset, scl*4, scl);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	for(var i = 0; i < mapTiles.length; i++){//Color Tiles
 		if(!dragging){
 			if(mapTiles[i].x == scl*2 && mapTiles[i].y == scl + window.pageYOffset){
 				RSlider.value(red(mapTiles[i].color));
@@ -142,52 +182,35 @@ function draw() {
 		}
 	}
 	
-	RSlider.position(scl*3, scl+((scl/6)*1) + window.pageYOffset);
-	GSlider.position(scl*3, scl+((scl/6)*3) + window.pageYOffset);
-	BSlider.position(scl*3, scl+((scl/6)*5) + window.pageYOffset);
-	RInput.position((scl*8)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	GInput.position((scl*9)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	BInput.position((scl*10)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	CCheckBox.position((scl*6)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	SaveButton.position((scl*11.5)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	LoadButton.position((scl*13)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	DeleteButton.position((scl*14.5)+(scl/2), scl+(scl/2) + window.pageYOffset);
-	ClearButton.position((scl*16)+(scl/2), scl+(scl/2) + window.pageYOffset);
-  
-	for(var i = 0; i < cols + 1; i++){
-		line(scl * i, 0, scl * i, rows*scl);
-	}
-	for(var i = 0; i < rows + 1; i++){
-		line(0, scl * i, cols*scl, scl * i);
-	}
-  
-	// Adjust location if being dragged
-	if (dragging) {
-		mapTiles[mapN].x = mouseX + offsetX;
-		mapTiles[mapN].y = mouseY + offsetY;
-	}
+	image(img[img.length-1], scl*2, scl + window.pageYOffset);//Color Picker
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	for(var i = 0; i < mapTiles.length; i++){
-		if(!mapTiles[i].clear){
-			fill(mapTiles[i].color);
-			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);
-		}
-		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);
-	}
-	
-	fill(RSlider.value(),GSlider.value(),BSlider.value());
-	rect(scl*2, scl + window.pageYOffset, scl*4, scl);
-	
-	image(img[img.length-1], scl*2, scl + window.pageYOffset);//Color Test
-	
-	for(var i = 0; i < img.length - 2; i++){
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	for(var i = 0; i < img.length - 2; i++){//Pickable Tiles
 		if(i == TileN){
 			fill(RSlider.value(),GSlider.value(),BSlider.value());
 			rect(scl*i, window.pageYOffset, scl, scl);
 		}
-		image(img[i], scl*i, window.pageYOffset);//Tiles
+		image(img[i], scl*i, window.pageYOffset);
 	}
-	image(img[img.length-2], scl, scl + window.pageYOffset);//Trash Can
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*for(var i = 0; i < mapTiles.length; i++){//Trash
+		if(!dragging){
+			if(mapTiles[i].x == scl && mapTiles[i].y == scl + window.pageYOffset){
+				if(mapTiles.length > 1){
+					for(var j = i; j < mapTiles.length - 1; j++){
+						mapTiles[j] = mapTiles[j + 1];
+					}
+				}
+				mapTiles = shorten(mapTiles);
+			}
+		}
+	}*/
+	
+	//image(img[img.length-2], scl, scl + window.pageYOffset);//Trash Can
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 function mousePressed() {
@@ -262,37 +285,21 @@ function keyTyped() {
 			TileN++;
 		}
 	}else if(key == 'w'){
-		if(y == 0){
-		}else{
-			SY = window.pageYOffset - (scl * scrollamount);
-			y -= scrollamount;
-		}
-		if(y < 0){y = 0;}
+		SY = window.pageYOffset - (scl * scrollamount);
 	}else if(key == 'a'){
-		if(x == 0){
-		}else{
-			SX = window.pageXOffset - (scl * scrollamount);
-			x -= scrollamount;
-		}
-		if(x < 0){x = 0;}
+		SX = window.pageXOffset - (scl * scrollamount);
 	}else if(key == 's'){
-		if(y == rows){
-		}else{
-			SY = window.pageYOffset + (scl * scrollamount);
-			y += scrollamount;
-		}
-		if(y > rows){y = rows;}
+		SY = window.pageYOffset + (scl * scrollamount);
 	}else if(key == 'd'){
-		if(x == cols){
+		SX = window.pageXOffset + (scl * scrollamount);
+	}else if(key == 'c'){
+		if(CClear){
+			CClear = false;
 		}else{
-			SX = window.pageXOffset + (scl * scrollamount);
-			x += scrollamount;
+			CClear = true;
 		}
-		if(x > cols){x = cols;}
 	}
 	//console.log(TileN);
-	console.log(x);
-	console.log(y);
 }
 
 function mTile(x, y, image, color, clear) {
