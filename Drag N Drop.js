@@ -1,3 +1,5 @@
+//Started April 9th, 2018 at 11:13:08am
+
 var dragging = false; // Is the object being dragged?
 var deleting = false;//Are we deleting tiles?
 var noTile = false;//Are we blocking placement of tiles?
@@ -78,7 +80,7 @@ function SaveCanvas(){//Save the canvas to local storage
 function FileSaveCanvas(){//Save the map to a file
 	save('MapCanvas.png');//Save the map to a PNG file
 	//var MapJSON = JSON.stringify(mapTiles);
-	//saveJSON(mapTiles, 'Map2.json');
+	saveJSON(mapTiles, 'Map2.json');
 }//FileSaveCanvas() END
 
 function LoadCanvas(){//Load the canvas from local storage
@@ -89,7 +91,7 @@ function LoadCanvas(){//Load the canvas from local storage
 }//LoadCanvas() END
 
 function FileLoadCanvas(file){//Load the canvas from storage
-	mapTiles = JSON.parse(file);//Set the map array
+	mapTiles = JSON.parse(JSON.stringify(file));//Set the map array
 	if(mapTiles == null){//Is the array null
 		mapTiles = [];//Reset the map array
 	}
@@ -168,8 +170,8 @@ function mousePressed(){//We pressed a mouse button
 			}else if(mouseButton == LEFT){//We clicked with the left button
 				mapN = i;//Keep track of what tile we clicked on
 				dragging = true;//We dragging
-				updateOffset(mapN);//Update the mouse offset of the tile
-				loadColors(mapN);//Load the color inputs and sliders with the color from the tile
+				updateOffset(i);//Update the mouse offset of the tile
+				loadColors(i);//Load the color inputs and sliders with the color from the tile
 				return false;//Don't do anything else
 			}/*else if(mouseButton == RIGHT){
 				return false;
