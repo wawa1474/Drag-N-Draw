@@ -1,17 +1,17 @@
 var dragging = false; // Is the object being dragged?
 var deleting = false;//Are we deleting tiles?
-var notile = false;//Are we blocking placement of tiles?
+var noTile = false;//Are we blocking placement of tiles?
 
-var MapN = 0;//Which map peice are we messing with
-var Timg = 46;//Total Images
+var mapN = 0;//Which map peice are we messing with
+var totalImages = 46;//Total Images
 var RSlider, GSlider, BSlider;//RGB Sliders
 var RInput, GInput, BInput;//RGB number Inputs
 var CCheckBox, CClear;//Clear Checkbox
 var SaveButton, LoadButton, DeleteButton, ClearButton, FileSaveButton, FileLoadButton;
 var NextButton, PrevButton;//Next and Previous row buttons
-var RowLength = 16;//How many tiles per row?
-var TileRow = 0;//Which row of tiles are we looking at?
-var TileN = 1;//Which tile is the cursor over?
+var rowLength = 16;//How many tiles per row?
+var tileRow = 0;//Which row of tiles are we looking at?
+var tileN = 1;//Which tile is the cursor over?
 
 var offsetX = 0, offsetY = 0;    // Mouseclick offset
 
@@ -24,7 +24,7 @@ var rows = 100;//Rows
 var SX = SY = 0;//Screen XY
 var mX, mY, pX, pY;//Mouse XY, Page Offset XY
 var fV = 1;//Fudge Value
-var scrollamount = 5;
+var scrollAmount = 5;
 
 var img = [];
 var mapTiles = [];
@@ -33,7 +33,7 @@ var mapTiles = [];
 function preload() {
 	img[img.length] = loadImage('assets/Border.png');//Border for Color
 	
-	for(var i = 0; i <= Timg; i++){
+	for(var i = 0; i <= totalImages; i++){
 		img[i+1] = loadImage('assets/' + i + '.png');
 	}
 	
@@ -97,26 +97,26 @@ function setup() {
 }
 
 function NextButtonC() {
-		TileRow++;
-		if(TileRow > Timg/RowLength){
-			TileRow = 0;
-		}
-		TileN += RowLength;
-		if(TileN > Timg + 1){
-			TileN = TileN - (Timg + 2);
-		}
+	tileRow++;
+	if(tileRow > totalImages/rowLength){
+		tileRow = 0;
+	}
+	tileN += rowLength;
+	if(tileN > totalImages + 1){
+		tileN = tileN - (totalImages + 2);
+	}
 	}
 
 function PrevButtonC() {
-		TileRow--;
-		if(TileRow < 0){
-			TileRow = Math.floor(Timg/RowLength);
-		}
-		TileN -= RowLength;
-		if(TileN < 0){
-			TileN = (Timg + 2) - (0 - TileN);
-		}
+	tileRow--;
+	if(tileRow < 0){
+		tileRow = Math.floor(totalImages/rowLength);
 	}
+	tileN -= rowLength;
+	if(tileN < 0){
+		tileN = (totalImages + 2) - (0 - tileN);
+	}
+}
 
 
 function SaveCanvas(){
@@ -242,19 +242,19 @@ function draw() {
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	fill(255);
-	rect(pX, pY, scl*RowLength, scl);
-	for(var i = 0; i < RowLength; i++){//Pickable Tiles
-		if(RowLength*TileRow+i <= Timg+1){
-			if(RowLength*TileRow+i == TileN){
+	rect(pX, pY, scl*rowLength, scl);
+	for(var i = 0; i < rowLength; i++){//Pickable Tiles
+		if(rowLength*tileRow+i <= totalImages+1){
+			if(rowLength*tileRow+i == tileN){
 				fill(RSlider.value(),GSlider.value(),BSlider.value());
 				rect(scl*i + pX, pY, scl, scl);
 			}
-			image(img[RowLength*TileRow+i], scl*i + pX, pY);
+			image(img[rowLength*tileRow+i], scl*i + pX, pY);
 		}
 	}
 	
-	NextButton.position(scl*(RowLength+1.7) + pX, (scl/2.5) + pY);
-	PrevButton.position(scl*(RowLength+.35) + pX, (scl/2.5) + pY);
+	NextButton.position(scl*(rowLength+1.7) + pX, (scl/2.5) + pY);
+	PrevButton.position(scl*(rowLength+.35) + pX, (scl/2.5) + pY);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,16 +292,16 @@ function mousePressed() {
 	pX = window.pageXOffset;
 	pY = window.pageYOffset;
 	
-	if(mX > 0 + pX && mX < scl*(RowLength+3) + pX && my > scl + pY && my < scl*2 + pY){
-		notile = true;
+	if(mX > 0 + pX && mX < scl*(rowLength+3) + pX && my > scl + pY && my < scl*2 + pY){
+		noTile = true;
 		return;
 	}
 
-	for(var i = 0; i < RowLength; i++){
+	for(var i = 0; i < rowLength; i++){
 		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && my > 0 + pY + fV && my < scl + pY - fV){
 			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
-			notile = true;
-			TileN = RowLength*TileRow+i;
+			noTile = true;
+			tileN = rowLength*tileRow+i;
 		}
 	}
 	/*if(mouseX > scl*2 + window.pageXOffset && mouseX < scl*3 + window.pageXOffset && mouseY > scl + window.pageYOffset && mouseY < scl*2 + window.pageYOffset){
@@ -344,7 +344,7 @@ function mousePressed() {
 			deleting = false;
 		}
 		if(mouseButton == LEFT){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,TileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 			//console.log(mapTiles[mapTiles.length-1].color);
 		}
 	}
@@ -372,7 +372,7 @@ function mouseDragged(){
 		}
 	}
 
-	if(notile){
+	if(noTile){
 		return;
 	}
 	if(dragging){
@@ -389,7 +389,7 @@ function mouseDragged(){
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,0/*img.length-1*/,RSlider.value(),GSlider.value(),BSlider.value(), false);
 			//console.log(mapTiles[mapTiles.length-1].color);
 		}else if(mouseButton == LEFT){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,TileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 			//console.log(mapTiles[mapTiles.length-1].color);
 		}
 	}
@@ -403,55 +403,56 @@ function mouseReleased() {
 		mapTiles[mapN].y = Math.floor(mouseY / scl) * scl;
 	}
 	dragging = false;
-	notile = false;
+	noTile = false;
 
-	for(var i = mapTiles.length-1; i >= 0; i--){
-		if(mapTiles[i].x >= pX && mapTiles[i].x < scl*RowLength + pX && mapTiles[i].y == pY){
-			if(mapTiles.length > 1){
-				for(var j = i; j < mapTiles.length - 1; j++){
-					mapTiles[j] = mapTiles[j + 1];
-				}
+	//for(var i = mapTiles.length-1; i >= 0; i--){
+	var i = mapN;
+	if(mapTiles[i].x >= pX && mapTiles[i].x < scl*rowLength + pX && mapTiles[i].y == pY){
+		if(mapTiles.length > 1){
+			for(var j = i; j < mapTiles.length - 1; j++){
+				mapTiles[j] = mapTiles[j + 1];
 			}
-			mapTiles = shorten(mapTiles);
-			//return false;
 		}
+		mapTiles = shorten(mapTiles);
+		//return false;
 	}
+	//}
 	//console.log(mapTiles.length);
 }
 
 function keyTyped() {
 	if(key == 'q'){
-		TileN--;
-		if(TileN < 0){
-			TileN = Timg + 1;
-			TileRow = Math.floor(Timg/RowLength);
+		tileN--;
+		if(tileN < 0){
+			tileN = totalImages + 1;
+			tileRow = Math.floor(totalImages/rowLength);
 		}
-		if(TileN < RowLength*TileRow){
-			TileRow--;
-			if(TileRow < 0){
-				TileRow = Math.floor(Timg/RowLength);
+		if(tileN < rowLength*tileRow){
+			tileRow--;
+			if(tileRow < 0){
+				tileRow = Math.floor(totalImages/rowLength);
 			}
 		}
 	}else if(key == 'e'){
-		TileN++;
-		if(TileN > Timg + 1){
-			TileN = 0;
-			TileRow = 0;
+		tileN++;
+		if(tileN > totalImages + 1){
+			tileN = 0;
+			tileRow = 0;
 		}
-		if(TileN == RowLength*(TileRow+1)){
-			TileRow++;
-			if(TileRow > Timg/RowLength){
-				TileRow = 0;
+		if(tileN == rowLength*(tileRow+1)){
+			tileRow++;
+			if(tileRow > totalImages/rowLength){
+				tileRow = 0;
 			}
 		}
 	}else if(key == 'w'){
-		SY = window.pageYOffset - (scl * scrollamount);
+		SY = window.pageYOffset - (scl * scrollAmount);
 	}else if(key == 'a'){
-		SX = window.pageXOffset - (scl * scrollamount);
+		SX = window.pageXOffset - (scl * scrollAmount);
 	}else if(key == 's'){
-		SY = window.pageYOffset + (scl * scrollamount);
+		SY = window.pageYOffset + (scl * scrollAmount);
 	}else if(key == 'd'){
-		SX = window.pageXOffset + (scl * scrollamount);
+		SX = window.pageXOffset + (scl * scrollAmount);
 	}else if(key == 'c'){
 		if(CClear){
 			CClear = false;
@@ -465,7 +466,7 @@ function keyTyped() {
 	}else if(key == 'x'){
 		NextButtonC();
 	}
-	//console.log(TileN);
+	//console.log(tileN);
 }
 
 function mTile(x, y, image, r, g, b, clear) {
