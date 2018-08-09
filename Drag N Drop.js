@@ -28,6 +28,8 @@ var rows = 100;//Rows
 var SX = SY = 0;//Screen XY
 var mX, mY, pX, pY;//Mouse XY, Page Offset XY
 var fV = 1;//Fudge Value
+var UIRight = 22;//How many tiles long is the UI?
+var UIBottom = 2;//How many tiles tall is the UI?
 
 
 var scrollAmount = 5;//How many squares to scroll when pressing WASD
@@ -210,7 +212,7 @@ function draw(){//Draw the canvas
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
 	
-	if(mX > 0 + pX && mX < scl*(rowLength+3) + pX && mY > scl + pY && mY < scl*2 + pY){//Did we click on the color UI
+	if(mX > 0 + pX && mX < scl*UIRight + pX && mY > 0 /* scl */ + pY && mY < scl*UIBottom + pY){//Did we click on the UI
 		noTile = true;//Dont allow tile placement
 		return;//Don't do anything else
 	}
@@ -446,7 +448,7 @@ function checkImage(tile){
 }//checkImage() END
 
 function placeTile(){//Place a tile at the mouses location
-	if(!(mY < scl*2 + pY + fV) && mY < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){//We're not on the UI and we're within the screen bounds
+	if(!(mY < scl*UIBottom + pY + fV) && mY < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){//We're not on the UI and we're within the screen bounds
 		if(mouseButton == CENTER && !deleting){//We're dragging with the middle button and not deleting
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileBorderNumber,RSlider.value(),GSlider.value(),BSlider.value(), false);//Place a colored tile with no image
 		}else if(mouseButton == LEFT){//We're dragging with the left button
