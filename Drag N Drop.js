@@ -53,6 +53,8 @@ function preload(){//Preload all of the images
 	}//Went through all the images
 	
 	player.image = loadImage('assets/Player.png');//Player Image
+	
+	mapTable = loadTable('MAP.csv', 'csv', 'header');//Load the csv
 }//preload() END
 
 function setup(){//Setup everything
@@ -128,20 +130,21 @@ function FileSaveMap(){//Save the Map to file
 	mapTable.addColumn('g');
 	mapTable.addColumn('b');
 	mapTable.addColumn('clear');
+	var newRow;
 	for(var i = 0; i < mapTiles.length - 1; i++){
-		var newRow = mapTable.addRow();
+		newRow = mapTable.addRow();
 		console.log(i);
 		newRow.set('x',mapTiles[i].x);//Tile X position
-		newRow.set('y',mapTiles[i].y);//Tile X position
-		newRow.set('image',i,mapTiles[i].image);//Tile X position
-		newRow.set('r',mapTiles[i].r);//Tile X position
-		newRow.set('g',mapTiles[i].g);//Tile X position
-		newRow.set('b',mapTiles[i].b);//Tile X position
+		newRow.set('y',mapTiles[i].y);//Tile Y position
+		newRow.set('image',mapTiles[i].image);//Tile Image
+		newRow.set('r',mapTiles[i].r);//Tile Red amount
+		newRow.set('g',mapTiles[i].g);//Tile Green amount
+		newRow.set('b',mapTiles[i].b);//Tile Blue amount
 		var CLEAR = 1;
 		if(!mapTiles[i].clear){
 			CLEAR = 0;
 		}
-		newRow.set('clear',CLEAR);//Tile X position
+		newRow.set('clear',CLEAR);//Tile Clear
 	}
 	console.log(mapTable);
 	saveTable(mapTable, 'MAP.csv');
@@ -150,7 +153,6 @@ function FileSaveMap(){//Save the Map to file
 function FileLoadMap(){//Load the Map from file
 	console.log("Loading MAP.csv");
 	mapTiles = [];//Clear the array
-	mapTable = loadTable('MAP.csv', 'csv');//Load the csv
 	console.log(mapTable.getRowCount());
 	console.log(mapTable.getColumnCount());
 	console.log(mapTable);
