@@ -5,11 +5,11 @@ var notile = false;//Are we blocking placement of tiles?
 var MapN = 0;//Which map peice are we messing with
 var TileN = 0;//Which tile is the cursor over
 var Timg = 46;//Total Images
-var RSlider, GSlider, BSlider;
-var RInput, GInput, BInput;
-var CCheckBox, CClear;
-var SaveButton, LoadButton, DeleteButton, ClearButton;
-var kludge = 0;
+var RSlider, GSlider, BSlider;//RGB Sliders
+var RInput, GInput, BInput;//RGB number Inputs
+var CCheckBox, CClear;//Clear Checkbox
+var SaveButton, LoadButton, DeleteButton, ClearButton, FileSaveButton, FileLoadButton;
+var NextButton, PrevButton, TileRow = 0;
 
 var offsetX = 0, offsetY = 0;    // Mouseclick offset
 
@@ -19,15 +19,13 @@ var cols = 100;//Columns
 var rows = 100;//Rows
 
 
-var SX = SY = 0;
-var mX, mY, pX, pY;
-var fV = 1;
+var SX = SY = 0;//Screen XY
+var mX, mY, pX, pY;//Mouse XY, Page Offset XY
+var fV = 1;//Fudge Value
 var scrollamount = 5;
 
 var img = [];
 var mapTiles = [];
-
-var tileT = 0;
 
 
 function preload() {
@@ -45,32 +43,52 @@ function setup() {
 	RSlider = createSlider(0,255,127);
 	RSlider.changed(function RSliderC() {RInput.value(this.value());});
 	RSlider.style('width', scl*2.8+'px');
+	
 	GSlider = createSlider(0,255,127);
 	GSlider.changed(function GSliderC() {GInput.value(this.value());});
 	GSlider.style('width', scl*2.8+'px');
+	
 	BSlider = createSlider(0,255,127);
 	BSlider.changed(function BSliderC() {BInput.value(this.value());});
 	BSlider.style('width', scl*2.8+'px');
+	
 	RInput = createInput(255);
 	RInput.input(function RInputC() {RSlider.value(this.value());});
 	RInput.style('width', scl+'px');
+	
 	GInput = createInput(255);
 	GInput.input(function GInputC() {GSlider.value(this.value());});
 	GInput.style('width', scl+'px');
+	
 	BInput = createInput(255);
 	BInput.input(function BInputC() {BSlider.value(this.value());});
 	BInput.style('width', scl+'px');
+	
 	CCheckBox = createCheckbox('Clear', false);
 	CCheckBox.changed(function CCheckBoxF() {if(this.checked()){CClear = true;}else{CClear = false;}});
+	
 	SaveButton = createButton('Save');
 	SaveButton.mousePressed(SaveCanvas);
+	
 	LoadButton = createButton('Load');
 	LoadButton.mousePressed(LoadCanvas);
+	
 	DeleteButton = createButton('Delete');
 	DeleteButton.mousePressed(DeleteCanvas);
+	
 	ClearButton = createButton('Clear');
 	ClearButton.mousePressed(ClearCanvas);
-	//LoadButton = createFileInput(LoadCanvas);
+	
+	FileSaveButton = createButton('Save File');
+	FileSaveButton.mousePressed(FileSaveCanvas);
+	
+	//FileLoadButton = createFileInput(FileLoadCanvas);
+	
+	NextButton = createButton('Next');
+	NextButton.mousePressed(function NextButtonC() {TileRow++;});
+	
+	PrevButton = createButton('Prev');
+	PrevButton.mousePressed(function PrevButtonC() {TileRow--;});
 	
 }
 
@@ -83,8 +101,23 @@ function SaveCanvas(){
 	//localStorage.removeItem("MapJSON");
 }
 
+function FileSaveCanvas(){
+	save('MapCanvas.png');
+	//var MapJSON = JSON.stringify(mapTiles);
+	//saveJSON(mapTiles, 'Map2.json');
+	//localStorage.setItem("MapJSON", MapJSON);
+	//localStorage.removeItem("MapJSON");
+}
+
 function LoadCanvas(){
 	mapTiles = JSON.parse(localStorage.getItem("MapJSON"));
+	if(mapTiles == null){
+		mapTiles = [];
+	}
+}
+
+function FileLoadCanvas(file){
+	mapTiles = JSON.parse(file);
 	if(mapTiles == null){
 		mapTiles = [];
 	}
@@ -118,6 +151,8 @@ function draw() {
 	LoadButton.position((scl*13)+(scl/2) + pX, scl+(scl/2) + pY);
 	DeleteButton.position((scl*14.5)+(scl/2) + pX, scl+(scl/2) + pY);
 	ClearButton.position((scl*16)+(scl/2) + pX, scl+(scl/2) + pY);
+	FileSaveButton.position((scl*17.5)+(scl/2) + pX, scl+(scl/2) + pY);
+	//FileLoadButton.position((scl*19.5)+(scl/2) + pX, scl+(scl/2) + pY);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,13 +223,18 @@ function draw() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	for(var i = 0; i < img.length - 2; i++){//Pickable Tiles
+	fill(255);
+	rect(pX, pY, scl*Timg, scl);
+	for(var i = 0; i <= Timg; i++){//Pickable Tiles
 		if(i == TileN){
 			fill(RSlider.value(),GSlider.value(),BSlider.value());
 			rect(scl*i + pX, pY, scl, scl);
 		}
 		image(img[i], scl*i + pX, pY);
 	}
+	
+	NextButton.position(scl*Timg + pX, (scl/2) + pY);
+	PrevButton.position(scl*Timg + pX, scl+(scl/2) + pY);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,10 +253,17 @@ function draw() {
 	
 	//image(img[img.length-2], scl, scl + window.pageYOffset);//Trash Can
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(tileT != mapTiles.length){
-		tileT = mapTiles.length;
-		console.log(tileT);
-	}
+	
+	
+	
+	
+	
+	/*push();
+	noFill();
+	translate(scl*4.5, scl*4.53);
+	//rotate(frameCount / -100.0);
+	polygon(0, 0, scl/1.7, 6); 
+	pop();*/
 }
 
 function mousePressed() {
@@ -230,9 +277,10 @@ function mousePressed() {
 		return;
 	}
 
-	for(var i = 0; i < img.length; i++){
+	for(var i = 0; i <= Timg; i++){
 		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && my > 0 + pY + fV && my < scl + pY - fV){
-			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
+			//mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
+			notile = true;
 			TileN = i;
 		}
 	}
@@ -251,7 +299,7 @@ function mousePressed() {
 				mapTiles = shorten(mapTiles);
 				deleting = true;
 				return false;
-			}else{
+			}else if(mouseButton == LEFT){
 				mapN = i;
 				dragging = true;
 				// If so, keep track of relative location of click to corner of rectangle
@@ -264,7 +312,9 @@ function mousePressed() {
 				GInput.value(mapTiles[i].g);
 				BInput.value(mapTiles[i].b);
 				return false;
-			}
+			}/*else if(mouseButton == RIGHT){
+				return false;
+			}*/
 		}
 	}
 	if(!(my < scl*2 + pY) && my < (windowHeight - (scl*1.5)) + pY && mX < (windowWidth - (scl)) + pX){
@@ -279,6 +329,7 @@ function mousePressed() {
 		}
 	}
 	if(mouseButton == CENTER){return false;}
+	//if(mouseButton == RIGHT){return false;}
 }
 
 function mouseDragged(){
@@ -294,7 +345,7 @@ function mouseDragged(){
 		return false;
 	}
 	for(var i = mapTiles.length-1; i >= 0; i--){
-		if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV){
+		if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV && !CClear){
 			return false;
 		}
 	}
@@ -362,4 +413,15 @@ function mTile(x, y, image, r, g, b, clear) {
 	this.g = g;
 	this.b = b;
 	this.clear = clear;
+}
+
+function polygon(x, y, radius, npoints) {
+  var angle = TWO_PI / npoints;
+  beginShape();
+  for (var a = 0; a < TWO_PI; a += angle) {
+    var sx = x + cos(a) * radius;
+    var sy = y + sin(a) * radius;
+    vertex(sx, sy);
+  }
+  endShape(CLOSE);
 }
