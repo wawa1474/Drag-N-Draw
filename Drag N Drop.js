@@ -625,7 +625,7 @@ function tileUI(){//The tile UI
 		ClearButton.mousePressed(ClearCanvas);//The function to run when pressed
 		FileSaveButton = createButton('Save File');//Text of button
 		FileSaveButton.mousePressed(FileSaveCanvas);//The function to run when pressed
-		//FileLoadButton = createFileInput(FileLoadCanvas);//createFileInput 'Load File'
+		//FileLoadButton = createFileInput(FileLoadMap);//createFileInput 'Load File'
 		FileLoadButton = createButton('Load File');//createFileInput 'Load File'
 		FileLoadButton.mousePressed(FileLoadMap);//The function to run when pressed
 		NextButton = createButton('Next');//Text of button
