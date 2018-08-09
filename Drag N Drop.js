@@ -8,6 +8,7 @@ var MapN = 0;//Which map peice are we messing with
 var RSlider, GSlider, BSlider;
 var RInput, GInput, BInput;
 var CCheckBox, CClear;
+var SaveButton;
 var kludge = 0;
 
 var x, y, w, h;          // Location and size
@@ -22,36 +23,14 @@ var rows = 100;//Math.floor(Sheight / scl);//Rows
 
 var img = [];
 function preload() {
-	img[0] = loadImage('assets/RoadVertical.png');//0
-	img[img.length] = loadImage('assets/RoadHorizontal.png');//1
-	img[img.length] = loadImage('assets/RoadBLTR.png');//2
-	img[img.length] = loadImage('assets/RoadTLBR.png');//3
-	img[img.length] = loadImage('assets/RoadCross.png');//4
-	img[img.length] = loadImage('assets/RoadCross45.png');//5
-	img[img.length] = loadImage('assets/RoadCross8.png');//6
-	img[img.length] = loadImage('assets/RoadCornerLU.png');//7
-	img[img.length] = loadImage('assets/RoadCornerLD.png');//8
-	img[img.length] = loadImage('assets/RoadCornerRU.png');//9
-	img[img.length] = loadImage('assets/RoadCornerRD.png');//10
-	img[img.length] = loadImage('assets/RoadCornerDLDR.png');//11
-	img[img.length] = loadImage('assets/RoadCornerULUR.png');//12
-	img[img.length] = loadImage('assets/RoadCornerULDL.png');//13
-	img[img.length] = loadImage('assets/RoadCornerURDR.png');//14
-	img[img.length] = loadImage('assets/RoadTeeDLR.png');//15
-	img[img.length] = loadImage('assets/RoadTeeULD.png');//16
-	img[img.length] = loadImage('assets/RoadTeeULR.png');//17
-	img[img.length] = loadImage('assets/RoadTeeURD.png');//18
-	img[img.length] = loadImage('assets/RoadTeeULDLDR.png');//19
-	img[img.length] = loadImage('assets/RoadTeeURDLDR.png');//20
-	img[img.length] = loadImage('assets/RoadTeeURULDR.png');//21
-	img[img.length] = loadImage('assets/RoadTeeURULDL.png');//22
-	img[img.length] = loadImage('assets/SettlementHamlet.png');//23
-	img[img.length] = loadImage('assets/SettlementVillage.png');//24
-	img[img.length] = loadImage('assets/SettlementTown.png');//25
-	img[img.length] = loadImage('assets/SettlementCity.png');//26
-	img[img.length] = loadImage('assets/SettlementPort.png');//26
-	img[img.length] = loadImage('assets/TrashCan.png');//27
-	img[img.length] = loadImage('assets/Test/TestColor.png');//28
+	
+	var Timg = 46;//Total Images
+	for(var i = 0; i <= Timg; i++){
+		img[i] = loadImage('assets/' + i + '.png');
+	}
+	
+	img[img.length] = loadImage('assets/TrashCan.png');//Trashcan Icon
+	img[img.length] = loadImage('assets/Border.png');//Border for Color
 }
 var mapTiles = [];
 //mapTiles[0] = new Tile(scl * 2, scl *2, 0);
@@ -90,7 +69,14 @@ function setup() {
 	BInput.style('width', scl+'px');
 	CCheckBox = createCheckbox('Clear', false);
 	CCheckBox.changed(function CCheckBoxF() {if(this.checked()){CClear = true;}else{CClear = false;}});
+	SaveButton = createButton('Save');
+	SaveButton.mousePressed(SaveCanvas);
 	
+}
+
+
+function SaveCanvas(){
+	save('MapCanvas.png');
 }
 
 
@@ -154,6 +140,7 @@ function draw() {
 	GInput.position((scl*9)+(scl/2), scl+(scl/2) + window.pageYOffset);
 	BInput.position((scl*10)+(scl/2), scl+(scl/2) + window.pageYOffset);
 	CCheckBox.position((scl*6)+(scl/2), scl+(scl/2) + window.pageYOffset);
+	SaveButton.position((scl*11.5)+(scl/2), scl+(scl/2) + window.pageYOffset);
 	
 	for(var i = 0; i < img.length - 2; i++){
 		image(img[i], scl*i, window.pageYOffset);//Tiles
