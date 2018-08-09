@@ -1,39 +1,52 @@
-//Created 2018-06-02 13:52:04
+Welcome to the Drag-N-Draw wiki!
 
-Mouse:
-	Left:
-		\-Place Selected Tile
-			|--With Color When Not Clear
-
-		\-Move Tile
-
-	Middle:
-		\-Place Colored Tile
-			|--No Image, Can't Be Clear
-
-		\-Delete Tile
-
-	Right:
+***
 
 
+# Mouse
+### Left:
+	\-Place Selected Tile
+		|--When Not Clicking On Existing Tile
+		|--With Color When Not Clear
+
+	\-Move Tile
+		|--When Clicking On Existing Tile
+		
+	\-Copy Clicked On Tile
+		|--When Clicking On Existing Tile
+
+### Middle:
+	\-Place Colored Tile
+		|--When Not Clicking On Existing Tile
+		|--No Image, Can't Be Clear
+
+	\-Delete Tile
+		|--When Clicking On Existing Tile
+### Right:
+	\-Recolor tile
+		|--When Clicking On Existing Tile
 
 
 
-Keyboard:
-	WASD:
-		\-Move Screen
+
+
+***
+
+# Keyboard:
+### WASD:
+	\-Move Screen
 	
-	IJKL:
-		\-Move All Tiles
+### IJKL:
+	\-Reposition All Tiles
 
-	QE:
-		\-Change Tile
+### QE:
+	\-Change Selected Tile
 
-	Z-X/Space-Shift:
-		\-Change Tile Row
+### Z-X/Space-Shift:
+	\-Change Tile Row
 
-	F:
-		\-Copy Tile
-
-	C:
-		\-Toggle Tile Clear
+### C:
+	\-Toggle Tile Clear
+	
+### P:
+	\-Set tile group XY1 and XY2
