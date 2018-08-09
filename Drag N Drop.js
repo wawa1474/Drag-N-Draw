@@ -3,13 +3,15 @@ var deleting = false;//Are we deleting tiles?
 var notile = false;//Are we blocking placement of tiles?
 
 var MapN = 0;//Which map peice are we messing with
-var TileN = 0;//Which tile is the cursor over
 var Timg = 46;//Total Images
 var RSlider, GSlider, BSlider;//RGB Sliders
 var RInput, GInput, BInput;//RGB number Inputs
 var CCheckBox, CClear;//Clear Checkbox
 var SaveButton, LoadButton, DeleteButton, ClearButton, FileSaveButton, FileLoadButton;
-var NextButton, PrevButton, TileRow = 0;
+var NextButton, PrevButton;//Next and Previous row buttons
+var RowLength = 16;//How many tiles per row?
+var TileRow = 0;//Which row of tiles are we looking at?
+var TileN = 0;//Which tile is the cursor over?
 
 var offsetX = 0, offsetY = 0;    // Mouseclick offset
 
@@ -29,12 +31,14 @@ var mapTiles = [];
 
 
 function preload() {
+	img[img.length] = loadImage('assets/Border.png');//Border for Color
+	
 	for(var i = 0; i <= Timg; i++){
-		img[i] = loadImage('assets/' + i + '.png');
+		img[i+1] = loadImage('assets/' + i + '.png');
 	}
 	
-	img[img.length] = loadImage('assets/TrashCan.png');//Trashcan Icon
-	img[img.length] = loadImage('assets/Border.png');//Border for Color
+	//img[img.length] = loadImage('assets/TrashCan.png');//Trashcan Icon
+	//img[img.length] = loadImage('assets/Border.png');//Border for Color
 }
 
 function setup() {
@@ -85,10 +89,20 @@ function setup() {
 	//FileLoadButton = createFileInput(FileLoadCanvas);
 	
 	NextButton = createButton('Next');
-	NextButton.mousePressed(function NextButtonC() {TileRow++;});
+	NextButton.mousePressed(function NextButtonC() {
+		TileRow++;
+		if(TileRow > Timg/RowLength){
+			TileRow = 0;
+		}
+	});
 	
 	PrevButton = createButton('Prev');
-	PrevButton.mousePressed(function PrevButtonC() {TileRow--;});
+	PrevButton.mousePressed(function PrevButtonC() {
+		TileRow--;
+		if(TileRow < 0){
+			TileRow = Math.floor(Timg/RowLength);
+		}
+	});
 	
 }
 
@@ -169,15 +183,7 @@ function draw() {
 	if (dragging) {
 		mapTiles[mapN].x = mX + offsetX;
 		mapTiles[mapN].y = my + offsetY;
-	}/*else{
-		if(mouseButton == LEFT){
-			for(var i = mapTiles.length-1; i >= 0; i--){
-				if(mouseX > mapTiles[i].x && mouseX < mapTiles[i].x + scl && mouseY > mapTiles[i].y && mouseY < mapTiles[i].y + scl){
-					//Hold left mouse or middle mouse and drag to place tiles
-				}
-			}
-		}
-	}*/
+	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,17 +230,19 @@ function draw() {
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	fill(255);
-	rect(pX, pY, scl*Timg, scl);
-	for(var i = 0; i <= Timg; i++){//Pickable Tiles
-		if(i == TileN){
-			fill(RSlider.value(),GSlider.value(),BSlider.value());
-			rect(scl*i + pX, pY, scl, scl);
+	rect(pX, pY, scl*RowLength, scl);
+	for(var i = 0; i < RowLength; i++){//Pickable Tiles
+		if(RowLength*TileRow+i <= Timg+1){
+			if(RowLength*TileRow+i == TileN){
+				fill(RSlider.value(),GSlider.value(),BSlider.value());
+				rect(scl*i + pX, pY, scl, scl);
+			}
+			image(img[RowLength*TileRow+i], scl*i + pX, pY);
 		}
-		image(img[i], scl*i + pX, pY);
 	}
 	
-	NextButton.position(scl*Timg + pX, (scl/2) + pY);
-	PrevButton.position(scl*Timg + pX, scl+(scl/2) + pY);
+	NextButton.position(scl*(RowLength+1.7) + pX, (scl/2.5) + pY);
+	PrevButton.position(scl*(RowLength+.35) + pX, (scl/2.5) + pY);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,11 +285,11 @@ function mousePressed() {
 		return;
 	}
 
-	for(var i = 0; i <= Timg; i++){
+	for(var i = 0; i < RowLength; i++){
 		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && my > 0 + pY + fV && my < scl + pY - fV){
 			//mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 			notile = true;
-			TileN = i;
+			TileN = RowLength*TileRow+i;
 		}
 	}
 	/*if(mouseX > scl*2 + window.pageXOffset && mouseX < scl*3 + window.pageXOffset && mouseY > scl + window.pageYOffset && mouseY < scl*2 + window.pageYOffset){
@@ -319,7 +327,7 @@ function mousePressed() {
 	}
 	if(!(my < scl*2 + pY) && my < (windowHeight - (scl*1.5)) + pY && mX < (windowWidth - (scl)) + pX){
 		if(mouseButton == CENTER){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,img.length-1,RSlider.value(),GSlider.value(),BSlider.value(), false);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,0/*img.length-1*/,RSlider.value(),GSlider.value(),BSlider.value(), false);
 			//console.log(mapTiles[mapTiles.length-1].color);
 			deleting = false;
 		}
@@ -352,7 +360,7 @@ function mouseDragged(){
 
 	if(!(my < scl*2 + pY + fV) && my < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){
 		if(mouseButton == CENTER && !deleting){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,img.length-1,RSlider.value(),GSlider.value(),BSlider.value(), false);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,0/*img.length-1*/,RSlider.value(),GSlider.value(),BSlider.value(), false);
 			//console.log(mapTiles[mapTiles.length-1].color);
 		}else if(mouseButton == LEFT){
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,TileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
@@ -376,14 +384,28 @@ function keyTyped() {
 	if(key == 'q'){
 		if(TileN == 0){
 			TileN = Timg;
+			TileRow = Math.floor(Timg/RowLength);
 		}else{
 			TileN--;
+		}
+		if(TileN < RowLength*TileRow){
+			TileRow--;
+			if(TileRow < 0){
+				TileRow = Math.floor(Timg/RowLength);
+			}
 		}
 	}else if(key == 'e'){
 		if(TileN == Timg){
 			TileN = 0;
+			TileRow = 0;
 		}else{
 			TileN++;
+		}
+		if(TileN == RowLength*(TileRow+1)){
+			TileRow++;
+			if(TileRow > Timg/RowLength){
+				TileRow = 0;
+			}
 		}
 	}else if(key == 'w'){
 		SY = window.pageYOffset - (scl * scrollamount);
