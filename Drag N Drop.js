@@ -38,6 +38,8 @@ var scrollSlider;
 var img = [];//Tile Image Array
 var mapTiles = [];//Map Tiles Array
 
+var player = new player();//Player
+
 var UI = new tileUI();//Create a UI
 var BG = new BGFunc();//Create a background
 
@@ -47,6 +49,8 @@ function preload(){//Preload all of the images
 	for(var i = 0; i <= totalImages; i++){//Go through all the images
 		img[i+1] = loadImage('assets/' + i + '.png');//And load them
 	}//Went through all the images
+	
+	player.image = loadImage('assets/Player.png');//Player Image
 }//preload() END
 
 function setup(){//Setup everything
@@ -210,6 +214,9 @@ function draw(){//Draw the canvas
 	UI.draw();//Draw the UI
 	
 	//BG.border();//Draw the RED border
+	
+	//player.update();
+	player.draw();
 }//Draw() END
 
 function mousePressed(){//We pressed a mouse button
@@ -307,10 +314,23 @@ function mouseReleased(){//We released the mouse button
 }//mouseReleased() END
 
 function keyPressed(){//We pressed a key
+	//console.log(keyCode);//What key did we press?
 	if (keyCode == 16){//We pressed shift
 		PrevButtonC();//Previous Tile row
 	}else if (keyCode == 32){//We pressed space
 		NextButtonC();//Next Tile Row
+		return false;//Block normal action
+	}else if (keyCode == 40){//We pressed down
+		player.move('DOWN');//Move Player Down
+		return false;//Block normal action
+	}else if (keyCode == 38){//We pressed up
+		player.move('UP');//Move Player Up
+		return false;//Block normal action
+	}else if (keyCode == 37){//We pressed left
+		player.move('LEFT');//Move Player Left
+		return false;//Block normal action
+	}else if (keyCode == 39){//We pressed right
+		player.move('RIGHT');//Move Player Right
 		return false;//Block normal action
 	}
 }
@@ -614,3 +634,29 @@ function tileUI(){//The tile UI
 		PrevButton.mousePressed(PrevButtonC);//The function to run when pressed
 	}//tileUI.setup() END
 }//tileUI() END
+
+function player(){//Player Functions
+	this.image;//Player Image
+	this.x = 0;//Player X position
+	this.y = 2;//Player Y position
+
+	this.move = function(direction){
+		if(direction == 'UP'){
+			this.y -= scrollAmount;
+		}else if(direction == 'LEFT'){
+			this.x -= scrollAmount;
+		}else if(direction == 'DOWN'){
+			this.y += scrollAmount;
+		}else if(direction == 'RIGHT'){
+			this.x += scrollAmount;
+		}
+	}
+
+	this.update = function(){
+		
+	}
+	
+	this.draw = function(){//Draw Player
+		image(this.image, scl*this.x + pX, scl*this.y + pY);//Draw Player
+	}
+}//player() END
