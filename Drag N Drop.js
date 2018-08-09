@@ -154,7 +154,7 @@ function ClearCanvas(){
 
 function draw(){
 	mX = mouseX;
-	my = mouseY;
+	mY = mouseY;
 	pX = window.pageXOffset;
 	pY = window.pageYOffset;
 	
@@ -182,8 +182,9 @@ function draw(){
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	if (dragging){//Are we dragging a tile
-		mapTiles[mapN].x = mX + offsetX;//Adjust X location of tile
-		mapTiles[mapN].y = my + offsetY;//Adjust Y location of tile
+		if(mapTiles[mapN] != null){
+			mapTiles[mapN].updateLocation();//Adjust XY location of tile
+		}
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,6 +195,7 @@ function draw(){
 			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);//Draw colored square behind tile
 		}
 		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
+		//mapTiles[i].display();
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,17 +228,17 @@ function draw(){
 
 function mousePressed(){
 	mX = mouseX;
-	my = mouseY;
+	mY = mouseY;
 	pX = window.pageXOffset;
 	pY = window.pageYOffset;
 	
-	if(mX > 0 + pX && mX < scl*(rowLength+3) + pX && my > scl + pY && my < scl*2 + pY){//Did we click on the UI
+	if(mX > 0 + pX && mX < scl*(rowLength+3) + pX && mY > scl + pY && mY < scl*2 + pY){//Did we click on the color UI
 		noTile = true;//Dont allow tile placement
 		return;//Don't do anything else
 	}
 
 	for(var i = 0; i < rowLength; i++){
-		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && my > 0 + pY + fV && my < scl + pY - fV){//Are we clicking on the tile
+		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && mY > 0 + pY + fV && mY < scl + pY - fV){//Are we clicking on the tile UI
 			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,i,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 			noTile = true;//Dont allow tile placement
 			tileN = rowLength*tileRow+i;
@@ -245,7 +247,7 @@ function mousePressed(){
 
 	// Did I click on the rectangle?
 	for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-		if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV){//Are we clicking on the tile
+		if(mapTiles[i].isCursorOn()){//Are we clicking on the tile
 			if(mouseButton == CENTER){//We clicked with the middle button
 				if(mapTiles.length > 1){//If there is more than 1 tile
 					for(var j = i; j < mapTiles.length - 1; j++){//Go through all tiles after the one we're deleting
@@ -253,32 +255,28 @@ function mousePressed(){
 					}
 				}
 				mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
+				mapN = null;
 				deleting = true;//We're deleting
 				return false;//Don't do anything else
 			}else if(mouseButton == LEFT){//We clicked with the left button
 				mapN = i;//Keep track of what tile we clicked on
 				dragging = true;//We dragging
 				offsetX = mapTiles[i].x-mX;//If so, keep track of relative X location of click to corner of rectangle
-				offsetY = mapTiles[i].y-my;//If so, keep track of relative Y location of click to corner of rectangle
-				RSlider.value(mapTiles[i].r);//Set Red Slider value to Red value of the tile
-				GSlider.value(mapTiles[i].g);//Set Green Slider value to Green value of the tile
-				BSlider.value(mapTiles[i].b);//Set Blue Slider value to Blue value of the tile
-				RInput.value(mapTiles[i].r);//Set Red Number Input value to Red value of the tile
-				GInput.value(mapTiles[i].g);//Set Green Number Input value to Green value of the tile
-				BInput.value(mapTiles[i].b);//Set Blue Number Input value to Blue value of the tile
+				offsetY = mapTiles[i].y-mY;//If so, keep track of relative Y location of click to corner of rectangle
+				mapTiles[i].loadColors();
 				return false;//Don't do anything else
 			}/*else if(mouseButton == RIGHT){
 				return false;
 			}*/
 		}
 	}
-	if(!(my < scl*2 + pY) && my < (windowHeight - (scl*1.5)) + pY && mX < (windowWidth - (scl)) + pX){
+	if(!(mY < scl*2 + pY) && mY < (windowHeight - (scl*1.5)) + pY && mX < (windowWidth - (scl)) + pX){
 		if(mouseButton == CENTER){//We clicked the middle mouse button
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,tileBorderNumber,RSlider.value(),GSlider.value(),BSlider.value(), false);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileBorderNumber,RSlider.value(),GSlider.value(),BSlider.value(), false);
 			deleting = false;//We aren't deleting
 		}
 		if(mouseButton == LEFT){//We clicked the left mouse button
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 		}
 	}
 	if(mouseButton == CENTER){return false;}//Don't allow normal middle mouse button action
@@ -286,19 +284,20 @@ function mousePressed(){
 
 function mouseDragged(){
 	mX = mouseX;
-	my = mouseY;
+	mY = mouseY;
 	pX = window.pageXOffset;
 	pY = window.pageYOffset;
 	
 	if(mouseButton == CENTER && deleting){//We dragging and deleting with the middle button
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-			if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV){//Are we clicking on the tile
+			if(mapTiles[i].isCursorOn()){//Are we clicking on the tile
 				if(mapTiles.length > 1){//If there is more than 1 tile
 					for(var j = i; j < mapTiles.length - 1; j++){//Go through all tiles after the one we're deleting
 						mapTiles[j] = mapTiles[j + 1];//Shift the tile down 1
 					}
 				}
 				mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
+				mapN = null;
 			}
 		}
 	}
@@ -307,16 +306,16 @@ function mouseDragged(){
 	if(dragging){return false;}
 	
 	for(var i = mapTiles.length-1; i >= 0; i--){
-		if(mX > mapTiles[i].x - fV && mX < mapTiles[i].x + scl + fV && my > mapTiles[i].y - fV && my < mapTiles[i].y + scl + fV){
+		if(mapTiles[i].isCursorOn()){
 			return false;
 		}
 	}
 
-	if(!(my < scl*2 + pY + fV) && my < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){
+	if(!(mY < scl*2 + pY + fV) && mY < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){
 		if(mouseButton == CENTER && !deleting){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,tileBorderNumber,RSlider.value(),GSlider.value(),BSlider.value(), false);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileBorderNumber,RSlider.value(),GSlider.value(),BSlider.value(), false);
 		}else if(mouseButton == LEFT){
-			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(my/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
+			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);
 		}
 	}
 	//return false;
@@ -324,21 +323,24 @@ function mouseDragged(){
 
 function mouseReleased(){
 	if(dragging){//Are we dragging a tile
-		mapTiles[mapN].x = Math.floor(mouseX / scl) * scl;//Adjust X location of tile
-		mapTiles[mapN].y = Math.floor(mouseY / scl) * scl;//Adjust Y location of tile
+		if(mapTiles[mapN] != null){
+			mapTiles[mapN].snapLocation();//Snap XY location of tile to grid
+		}
 	}
 	
 	dragging = false;//Quit dragging
 	noTile = false;//Allow tile placement
 
-	if(mapTiles[mapN].x >= pX && mapTiles[mapN].x < scl*rowLength + pX && mapTiles[mapN].y == pY){//Is the tile we just dropped on the UI
-		if(mapTiles.length > 1){//If there is more than 1 tile
-			for(var j = mapN; j < mapTiles.length - 1; j++){//Go through all tiles after the one we're deleting
-				mapTiles[j] = mapTiles[j + 1];//Shift the tile down 1
+	if(mapTiles[mapN] != null){
+		if(mapTiles[mapN].x >= pX && mapTiles[mapN].x < scl*rowLength + pX && mapTiles[mapN].y == pY){//Is the tile we just dropped on the UI
+			if(mapTiles.length > 1){//If there is more than 1 tile
+				for(var j = mapN; j < mapTiles.length - 1; j++){//Go through all tiles after the one we're deleting
+					mapTiles[j] = mapTiles[j + 1];//Shift the tile down 1
+				}
 			}
+			mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
+			//return false;
 		}
-		mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
-		//return false;
 	}
 }//mouseReleased() END
 
@@ -398,4 +400,35 @@ function mTile(x, y, image, r, g, b, clear){//Tile Object
 	this.g = g;//Store Green Value
 	this.b = b;//Store Blue Value
 	this.clear = clear;//Is the tile clear
+	
+	this.isCursorOn = function(){
+		return(mX > this.x - fV && mX < this.x + scl + fV && mY > this.y - fV && mY < this.y + scl + fV);
+	}
+	
+	this.loadColors = function(){
+		RSlider.value(this.r);//Set Red Slider value to Red value of the tile
+		GSlider.value(this.g);//Set Green Slider value to Green value of the tile
+		BSlider.value(this.b);//Set Blue Slider value to Blue value of the tile
+		RInput.value(this.r);//Set Red Number Input value to Red value of the tile
+		GInput.value(this.g);//Set Green Number Input value to Green value of the tile
+		BInput.value(this.b);//Set Blue Number Input value to Blue value of the tile
+	}
+	
+	this.updateLocation = function(){//Adjust XY location of tile
+		this.x = mX + offsetX;//Adjust X location of tile
+		this.y = mY + offsetY;//Adjust Y location of tile
+	}
+	
+	this.snapLocation = function(){//Snap XY location of tile to grid
+		this.x = Math.floor(mouseX / scl) * scl;//Snap X location of tile to grid
+		this.y = Math.floor(mouseY / scl) * scl;//Snap Y location of tile to grid
+	}
+	
+	this.display = function(){
+		if(!this.clear){//Is the tile colored
+			fill(this.r,this.g,this.b);//Set Tile background color
+			rect(this.x,this.y,scl,scl);//Draw colored square behind tile
+		}
+		image(img[this.image], this.x, this.y);//Draw tile
+	}
 }//mTile() END
