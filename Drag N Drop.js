@@ -203,27 +203,31 @@ function draw(){//Draw the canvas
 		image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
 	}//Went through all the tiles
 
-
+	BG.border();//Draw the RED border
+	
 	//Update and Draw the UI
 	UI.update();//Update the UI position
 	UI.draw();//Draw the UI
+	
+	//BG.border();//Draw the RED border
 }//Draw() END
 
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
-	
-	if(mX > 0 + pX && mX < scl*UIRight + pX && mY > 0 /* scl */ + pY && mY < scl*UIBottom + pY){//Did we click on the UI
-		noTile = true;//Dont allow tile placement
-		return;//Don't do anything else
-	}
 
 	for(var i = 0; i < rowLength; i++){//Go through all the tiles in the row
 		if(mX > scl*i + pX + fV && mX < scl*(i+1) + pX - fV && mY > 0 + pY + fV && mY < scl + pY - fV){//Are we clicking on the tile UI
 			noTile = true;//Dont allow tile placement
+			if(img[rowLength*tileRow+i] == null){return;}
 			tileN = rowLength*tileRow+i;//Set the tile cursor to the tile we clicked on
 			mapTiles[mapTiles.length] = new mTile(scl*i + pX,0 + pY,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Create a tile
 		}
 	}//Went through all the tiles in the row
+	
+	if(mX > 0 + pX && mX < scl*UIRight + pX && mY > 0 /* scl */ + pY && mY < scl*UIBottom + pY){//Did we click on the UI
+		noTile = true;//Dont allow tile placement
+		//return;//Don't do anything else
+	}
 
 	// Did I click on the rectangle?
 	for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
@@ -290,6 +294,7 @@ function mouseReleased(){//We released the mouse button
 		}
 	}
 	
+	deleting = false;//Quit deleting
 	dragging = false;//Quit dragging
 	noTile = false;//Allow tile placement
 
@@ -361,7 +366,7 @@ function keyTyped(){//We typed a key
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
 			if(isCursorOnTile(i)){//Are we clicking on the tile
 				loadTile(i);//Load tileN with whatever tile we just checked
-				updateTileRow();//Get the row to whatever tile were on
+				updateTileRow();//Get the row to whatever tile we're on
 			}
 		}
 	}else if(key == 'i'){//We pressed 'I'
@@ -448,7 +453,8 @@ function checkImage(tile){
 }//checkImage() END
 
 function placeTile(){//Place a tile at the mouses location
-	if(!(mY < scl*UIBottom + pY + fV) && mY < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){//We're not on the UI and we're within the screen bounds
+	//console.log(mouseButton);
+	if(mY > scl*UIBottom + pY + fV && mY < (windowHeight - (scl*1.5)) + pY + fV && mX < (windowWidth - (scl)) + pX + fV){//We're not on the UI and we're within the screen bounds
 		if(mouseButton == CENTER && !deleting){//We're dragging with the middle button and not deleting
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileBorderNumber,RSlider.value(),GSlider.value(),BSlider.value(), false);//Place a colored tile with no image
 		}else if(mouseButton == LEFT){//We're dragging with the left button
@@ -457,6 +463,7 @@ function placeTile(){//Place a tile at the mouses location
 			mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 		}
 	}
+	//console.log(mapTiles.length);//How many tiles are there?
 }//placeTile() END
 
 function deleteTile(tile){//Delete a tile and update the array
@@ -466,6 +473,7 @@ function deleteTile(tile){//Delete a tile and update the array
 		}//Went through all tiles after the one we're deleting
 	}
 	mapTiles = shorten(mapTiles);//Shorten the Map Tiles Array by 1
+	//console.log(mapTiles.length);//How many tiles are there?
 }//deleteTile() END
 
 function mTile(x, y, image, r, g, b, clear){//Tile Object
@@ -483,39 +491,25 @@ function BGFunc(){//The background function
 		background(255);//Draw the white background
 
 		//Draw Grid on Screen
-		strokeWeight(4); // Thicker
-		stroke(255,0,0);//RED
-		line(1, 0, 1, rows*scl);//Draw Verticle lines
-
-		strokeWeight(1); // Default
-		stroke(0);//BLACK
 		for(var i = 1; i < cols + 0; i++){//Draw all the column lines
 			line(scl * i, 0, scl * i, rows*scl);//Draw Verticle lines
 		}//Drew all the column lines
 
-		strokeWeight(4); // Thicker
-		stroke(255,0,0);//RED
-		line((scl * cols) - 1, 0, (scl * cols) - 1, rows*scl);//Draw Verticle lines
-
-
-		strokeWeight(4); // Thicker
-		stroke(255,0,0);//RED
-		line(0, 1, cols*scl, 1);//Draw Horizontal Lines
-
-		strokeWeight(1); // Default
-		stroke(0);//BLACK
 		for(var i = 1; i < rows + 0; i++){//Draw all the row lines
 			line(0, scl * i, cols*scl, scl * i);//Draw Horizontal Lines
 		}//Drew all the row lines
-
+	}//BGFunc.draw = function() END
+	
+	this.border = function(){
 		strokeWeight(4); // Thicker
 		stroke(255,0,0);//RED
+		line(1, 0, 1, rows*scl);//Draw Verticle lines
+		line((scl * cols) - 1, 0, (scl * cols) - 1, rows*scl);//Draw Verticle lines
+		line(0, 1, cols*scl, 1);//Draw Horizontal Lines
 		line(0, (scl * rows) - 1, cols*scl, (scl * rows) - 1);//Draw Horizontal Lines
-		
 		strokeWeight(1); // Default
 		stroke(0);//BLACK
-
-	}//BGFunc.draw = function() END
+	}
 }//BGFunc() END
 
 function tileUI(){//The tile UI
@@ -535,6 +529,11 @@ function tileUI(){//The tile UI
 				image(img[rowLength*tileRow+i], scl*i + pX, pY);//Draw tile
 			}
 		}//Went through all the tiles
+		
+		textSize(24);
+		fill(255,0,0);
+		text(mapTiles.length, scl*17.3, scl*1.8);
+		textSize(12);//Default
 	}//tileUI.draw = function() END
 	
 	this.update = function(){//Update the UI position
