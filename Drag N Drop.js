@@ -21,8 +21,8 @@ var drawnTiles = 0;//how many tiles are on the screen
 var drawAll = false;//draw all tiles even if not on screen?
 var FPSCutOff = 2;//how many digits of fps to show
 
-var tilePlaceSquareCount = 0;//what step are we in setting tile group
-var tilePlaceSquareDeleting = false;//are we deleting the tile group
+var tileGroupCount = 0;//what step are we in setting tile group
+var tileGroupDeleting = false;//are we deleting the tile group
 var sx1, sy1, sx2, sy2;//square tile group XY corners
 
 var tileBorderNumber = 0;//What number in img[] is the border (its just a null tile)
@@ -246,7 +246,7 @@ function draw(){//Draw the canvas
 	
 	//BG.border();//Draw the RED border
 	
-	if(tilePlaceSquareCount == 1){
+	if(tileGroupCount == 1){
 		var lX1,lX2,lY1,lY2;
 		
 		if(sx1 < mouseX){//if x1 is less than x2
@@ -273,7 +273,7 @@ function draw(){//Draw the canvas
 		line(lX1, lY2, lX2, lY2);//Draw Bottom
 		strokeWeight(1); // Default
 		stroke(0);//BLACK
-	}else if(tilePlaceSquareCount == 2){
+	}else if(tileGroupCount == 2){
 		var lX1,lX2,lY1,lY2;
 		
 		if(sx1 < sx2){//if x1 is less than x2
@@ -308,25 +308,25 @@ function draw(){//Draw the canvas
 
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
-	if(tilePlaceSquareCount == 2){//placing group of tiles
+	if(tileGroupCount == 2){//placing group of tiles
 		if(mouseButton == LEFT){//We clicked with the left button
-			placeTileSquare('left');//placing image tiles
+			tileGroup('left');//placing image tiles
 			return false;//Block normal action
 		}else if(mouseButton == CENTER){//We clicked with the middle button
 			for(var i = mapTiles.length-1; i >= 0; i--){//Loop through all tiles
 				if(isCursorOnTile(i)){//Are we clicking on the tile
-					tilePlaceSquareDeleting = true;//deleting group of tiles
+					tileGroupDeleting = true;//deleting group of tiles
 					//break;
 				}
 			}//Went through all the tiles
-			placeTileSquare('center');//placing colored tile
+			tileGroup('center');//placing colored tile
 			return false;//Block normal action
 		}
 	}
 	
 	if(mouseButton == RIGHT){//We clicked with the right button
-		if(tilePlaceSquareCount == 2){//placing group of tiles
-			placeTileSquare('right');//coloring group of tiles
+		if(tileGroupCount == 2){//placing group of tiles
+			tileGroup('right');//coloring group of tiles
 		}else{
 			for(var i = 0; i <= mapTiles.length-1; i++){//Loop through all tiles
 				if(isCursorOnTile(i)){//Are we clicking on the tile
@@ -548,13 +548,13 @@ function keyTyped(){//We typed a key
 			}
 		}
 	}else if(key == 'p'){//We pressed 'R'
-		//placeTileSquare(scl * 10, scl * 3, scl * 5, scl * 10)
-		if(tilePlaceSquareCount == 0){//set XY1
-			tilePlaceSquareCount = 1;//ready for next step
+		//tileGroup(scl * 10, scl * 3, scl * 5, scl * 10)
+		if(tileGroupCount == 0){//set XY1
+			tileGroupCount = 1;//ready for next step
 			sx1 = mouseX;//set x1 to mouse x position
 			sy1 = mouseY;//set y1 to mouse y position
-		}else if (tilePlaceSquareCount == 1){//set XY2
-			tilePlaceSquareCount = 2;//ready to do group tiles stuff
+		}else if (tileGroupCount == 1){//set XY2
+			tileGroupCount = 2;//ready to do group tiles stuff
 			sx2 = mouseX;//set x1 to mouse x position
 			sy2 = mouseY;//set y2 to mouse y position
 		}
@@ -660,7 +660,7 @@ function placeTile(){//Place a tile at the mouses location
 	//console.log(mapTiles.length);//How many tiles are there?
 }//placeTile() END
 
-function placeTileSquare(button){//mess with tiles in square group
+function tileGroup(button){//mess with tiles in square group
 	var X1, X2, Y1, Y2;//define XY positions
 	var XLines, YLines;//define number of XY lines
 	
@@ -694,9 +694,9 @@ function placeTileSquare(button){//mess with tiles in square group
 				//if(checkImageXY(tileN, X1 + (scl * j),Y1 + (scl * i)) == true){
 				mapTiles[mapTiles.length] = new mTile(X1 + (scl * j),Y1 + (scl * i),tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 				//}
-			}else if(button == 'center' && tilePlaceSquareDeleting == true){//we clicked middle button on a tile
+			}else if(button == 'center' && tileGroupDeleting == true){//we clicked middle button on a tile
 				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
-					if(isCursorOnTileXY(k, X1 + (scl * j), Y1 + (scl * i))){//Are we clicking on the tile
+					if(isCursorOnTileXY(k, (X1 + (scl * j)) + 4, (Y1 + (scl * i)) + 4)){//Are we clicking on the tile
 						deleteTile(k);//delete the tile
 					}
 				}
@@ -704,7 +704,7 @@ function placeTileSquare(button){//mess with tiles in square group
 				mapTiles[mapTiles.length] = new mTile(X1 + (scl * j),Y1 + (scl * i),tileBorderNumber,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 			}else if(button == 'right'){//we clicked right button
 				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
-					if(isCursorOnTileXY(k, X1 + (scl * j), Y1 + (scl * i))){//Are we clicking on the tile
+					if(isCursorOnTileXY(k, (X1 + (scl * j)) + 4, (Y1 + (scl * i)) + 4)){//Are we clicking on the tile
 						mapTiles[k].r = RSlider.value();//set tile red value to red slider value
 						mapTiles[k].g = GSlider.value();//set tile green value to green slider value
 						mapTiles[k].b = BSlider.value();//set tile blue value to blue slider value
@@ -713,8 +713,8 @@ function placeTileSquare(button){//mess with tiles in square group
 			}
 		}
 	}
-	tilePlaceSquareCount = 0;//reset step count
-	tilePlaceSquareDeleting = false;//no longer deleting
+	tileGroupCount = 0;//reset step count
+	tileGroupDeleting = false;//no longer deleting
 }//placeTile() END
 
 function deleteTile(tile){//Delete a tile and update the array
