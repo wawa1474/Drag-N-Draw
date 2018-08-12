@@ -21,9 +21,9 @@ var drawnTiles = 0;//how many tiles are on the screen
 var drawAll = false;//draw all tiles even if not on screen?
 var FPSCutOff = 2;//how many digits of fps to show
 
-var tileGroupCount = 0;//what step are we in setting tile group
+var tileGroupStep = 0;//what step are we in setting tile group
 var tileGroupDeleting = false;//are we deleting the tile group
-var sx1, sy1, sx2, sy2;//square tile group XY corners
+var sx1, sy1, sx2, sy2;//tileGroup XY corners
 
 var tileBorderNumber = 0;//What number in img[] is the border (its just a null tile)
 
@@ -106,7 +106,6 @@ function PrevButtonC(){//Previous Row
 		tileRow = Math.floor(totalImages/rowLength);//Loop the row number back to the last
 	}
 }//PrevButtonC() END
-
 
 function SaveCanvas(){//Save the canvas to local storage
 	var MapJSON = JSON.stringify(mapTiles);//Ready the map for storage
@@ -246,41 +245,8 @@ function draw(){//Draw the canvas
 	
 	//BG.border();//Draw the RED border
 	
-	if(tileGroupCount > 0){
-		var lX1,lX2,lY1,lY2,lsx2,lsy2;
-		
-		if(tileGroupCount == 1){
-			lsx2 = mouseX;
-			lsy2 = mouseY;
-		}else if(tileGroupCount == 2){
-			lsx2 = sx2;
-			lsy2 = sy2;
-		}
-		
-		if(sx1 < lsx2){//if x1 is less than x2
-			lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
-			lX2 = Math.ceil(lsx2 / scl) * scl;//do stuff to x?
-		}else{//otherwise
-			lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
-			lX1 = Math.floor(lsx2 / scl) * scl;//do stuff to x?
-		}
-	
-		if(sy1 < lsy2){//if y1 is less than y2
-			lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
-			lY2 = Math.ceil(lsy2 / scl) * scl;//do stuff to x?
-		}else{//otherwise
-			lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
-			lY1 = Math.floor(lsy2 / scl) * scl;//do stuff to x?
-		}
-		
-		strokeWeight(borderThickness); // Thicker
-		stroke(255,0,0);//RED
-		line(lX1, lY1, lX1, lY2);//Draw Left
-		line(lX2, lY1, lX2, lY2);//Draw Right
-		line(lX1, lY1, lX2, lY1);//Draw Top
-		line(lX1, lY2, lX2, lY2);//Draw Bottom
-		strokeWeight(1); // Default
-		stroke(0);//BLACK
+	if(tileGroupStep > 0){
+		drawTileGroupOutline();
 	}
 	
 	//player.update();
@@ -289,7 +255,7 @@ function draw(){//Draw the canvas
 
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
-	if(tileGroupCount == 2){//placing group of tiles
+	if(tileGroupStep == 2){//placing group of tiles
 		if(mouseButton == LEFT){//We clicked with the left button
 			tileGroup('left');//placing image tiles
 			return false;//Block normal action
@@ -306,7 +272,7 @@ function mousePressed(){//We pressed a mouse button
 	}
 	
 	if(mouseButton == RIGHT){//We clicked with the right button
-		if(tileGroupCount == 2){//placing group of tiles
+		if(tileGroupStep == 2){//placing group of tiles
 			tileGroup('right');//coloring group of tiles
 		}else{
 			for(var i = 0; i <= mapTiles.length-1; i++){//Loop through all tiles
@@ -530,12 +496,12 @@ function keyTyped(){//We typed a key
 		}
 	}else if(key == 'p'){//We pressed 'R'
 		//tileGroup(scl * 10, scl * 3, scl * 5, scl * 10)
-		if(tileGroupCount == 0){//set XY1
-			tileGroupCount = 1;//ready for next step
+		if(tileGroupStep == 0){//set XY1
+			tileGroupStep = 1;//ready for next step
 			sx1 = mouseX;//set x1 to mouse x position
 			sy1 = mouseY;//set y1 to mouse y position
-		}else if (tileGroupCount == 1){//set XY2
-			tileGroupCount = 2;//ready to do group tiles stuff
+		}else if (tileGroupStep == 1){//set XY2
+			tileGroupStep = 2;//ready to do group tiles stuff
 			sx2 = mouseX;//set x1 to mouse x position
 			sy2 = mouseY;//set y2 to mouse y position
 		}
@@ -640,9 +606,47 @@ function placeTile(){//Place a tile at the mouses location
 	}
 }//placeTile() END
 
+function drawTileGroupOutline(){
+	var X1,X2,Y1,Y2,asx2,asy2;
+		
+	if(tileGroupStep == 1){
+		asx2 = mouseX;
+		asy2 = mouseY;
+	}else if(tileGroupStep == 2){
+		asx2 = sx2;
+		asy2 = sy2;
+	}
+		
+	if(sx1 < asx2){//if x1 is less than x2
+		X1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
+		X2 = Math.ceil(asx2 / scl) * scl;//do stuff to x?
+	}else{//otherwise
+		X2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
+		X1 = Math.floor(asx2 / scl) * scl;//do stuff to x?
+	}
+	
+	if(sy1 < asy2){//if y1 is less than y2
+		Y1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
+		Y2 = Math.ceil(asy2 / scl) * scl;//do stuff to x?
+	}else{//otherwise
+		Y2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
+		Y1 = Math.floor(asy2 / scl) * scl;//do stuff to x?
+	}
+		
+	strokeWeight(borderThickness); // Thicker
+	stroke(255,0,0);//RED
+	line(X1, Y1, X1, Y2);//Draw Left
+	line(X2, Y1, X2, Y2);//Draw Right
+	line(X1, Y1, X2, Y1);//Draw Top
+	line(X1, Y2, X2, Y2);//Draw Bottom
+	strokeWeight(1); // Default
+	stroke(0);//BLACK
+}
+
 function tileGroup(button){//mess with tiles in square group
 	var X1, X2, Y1, Y2;//define XY positions
 	var XLines, YLines;//define number of XY lines
+	var stillTiles = false;
 	
 	if(sx1 < sx2){//if x1 is less than x2
 		X1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
@@ -673,6 +677,7 @@ function tileGroup(button){//mess with tiles in square group
 				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
 					if(isCursorOnTileXY(k, (X1 + (scl * j)) + 4, (Y1 + (scl * i)) + 4)){//Are we clicking on the tile
 						deleteTile(k);//delete the tile
+						k--;
 					}
 				}
 			}else if(button == 'center'){//we clicked middle button
@@ -688,7 +693,7 @@ function tileGroup(button){//mess with tiles in square group
 			}
 		}
 	}
-	tileGroupCount = 0;//reset step count
+	tileGroupStep = 0;//reset step count
 	tileGroupDeleting = false;//no longer deleting
 }//placeTile() END
 
