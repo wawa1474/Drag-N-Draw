@@ -247,40 +247,30 @@ function draw(){//Draw the canvas
 	//BG.border();//Draw the RED border
 	
 	if(tileGroupCount > 0){
-		var lX1,lX2,lY1,lY2;
+		var lX1,lX2,lY1,lY2,lsx2,lsy2;
 		
 		if(tileGroupCount == 1){
-			if(sx1 < mouseX){//if x1 is less than x2
-				lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
-				lX2 = Math.ceil(mouseX / scl) * scl;//do stuff to x?
-			}else{//otherwise
-				lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
-				lX1 = Math.floor(mouseX / scl) * scl;//do stuff to x?
-			}
-	
-			if(sy1 < mouseY){//if y1 is less than y2
-				lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
-				lY2 = Math.ceil(mouseY / scl) * scl;//do stuff to x?
-			}else{//otherwise
-				lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
-				lY1 = Math.floor(mouseY / scl) * scl;//do stuff to x?
-			}
+			lsx2 = mouseX;
+			lsy2 = mouseY;
 		}else if(tileGroupCount == 2){
-			if(sx1 < sx2){//if x1 is less than x2
-				lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
-				lX2 = Math.ceil(sx2 / scl) * scl;//do stuff to x?
-			}else{//otherwise
-				lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
-				lX1 = Math.floor(sx2 / scl) * scl;//do stuff to x?
-			}
+			lsx2 = sx2;
+			lsy2 = sy2;
+		}
+		
+		if(sx1 < lsx2){//if x1 is less than x2
+			lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
+			lX2 = Math.ceil(lsx2 / scl) * scl;//do stuff to x?
+		}else{//otherwise
+			lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
+			lX1 = Math.floor(lsx2 / scl) * scl;//do stuff to x?
+		}
 	
-			if(sy1 < sy2){//if y1 is less than y2
-				lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
-				lY2 = Math.ceil(sy2 / scl) * scl;//do stuff to x?
-			}else{//otherwise
-				lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
-				lY1 = Math.floor(sy2 / scl) * scl;//do stuff to x?
-			}
+		if(sy1 < lsy2){//if y1 is less than y2
+			lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
+			lY2 = Math.ceil(lsy2 / scl) * scl;//do stuff to x?
+		}else{//otherwise
+			lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
+			lY1 = Math.floor(lsy2 / scl) * scl;//do stuff to x?
 		}
 		
 		strokeWeight(borderThickness); // Thicker
