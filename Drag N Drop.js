@@ -10,8 +10,8 @@ var mapN = 0;//Which map peice are we messing with
 var totalImages = 39;//Total Images
 var RSlider, GSlider, BSlider;//RGB Sliders
 var RInput, GInput, BInput;//RGB number Inputs
-var CCheckBox, CClear = 0;//Clear Checkbox
-var SaveButton, LoadButton, DeleteButton, ClearButton, FileSaveButton, FileLoadButton;//Button Variables
+var CCheckBox, CClear = 0;//Clear Checkbox and variable
+var SaveButton, LoadButton, DeleteButton, ClearButton, FileSaveButton, FileLoadButton;//Buttons
 var NextButton, PrevButton;//Next and Previous row buttons
 var rowLength = 16;//How many tiles per row?
 var tileRow = 0;//Which row of tiles are we looking at?
@@ -22,10 +22,10 @@ var drawAll = false;//draw all tiles even if not on screen?
 var FPSCutOff = 2;//how many digits of fps to show
 
 var tilePlaceSquareCount = 0;//what step are we in setting tile group
-var tilePlaceSquareDeleting = false;//were not deleting the tile group
+var tilePlaceSquareDeleting = false;//are we deleting the tile group
 var sx1, sy1, sx2, sy2;//square tile group XY corners
 
-var tileBorderNumber = 0;//What number in img[] is the border
+var tileBorderNumber = 0;//What number in img[] is the border (its just a null tile)
 
 var offsetX = 0, offsetY = 0;//Mouseclick offset
 
@@ -45,7 +45,7 @@ var UIBottom = 2;//How many tiles tall is the UI?
 var scrollAmount = 5;//How many squares to scroll when pressing WASD
 var scrollSlider;//scroll slider
 
-var img = [];//Tile Image Array
+var img = [];//Tile Images Array
 var mapTiles = [];//Map Tiles Array
 var Background;//background image
 
@@ -245,6 +245,62 @@ function draw(){//Draw the canvas
 	UI.draw();//Draw the UI
 	
 	//BG.border();//Draw the RED border
+	
+	if(tilePlaceSquareCount == 1){
+		var lX1,lX2,lY1,lY2;
+		
+		if(sx1 < mouseX){//if x1 is less than x2
+			lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
+			lX2 = Math.ceil(mouseX / scl) * scl;//do stuff to x?
+		}else{//otherwise
+			lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
+			lX1 = Math.floor(mouseX / scl) * scl;//do stuff to x?
+		}
+	
+		if(sy1 < mouseY){//if y1 is less than y2
+			lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
+			lY2 = Math.ceil(mouseY / scl) * scl;//do stuff to x?
+		}else{//otherwise
+			lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
+			lY1 = Math.floor(mouseY / scl) * scl;//do stuff to x?
+		}
+		
+		strokeWeight(borderThickness); // Thicker
+		stroke(255,0,0);//RED
+		line(lX1, lY1, lX1, lY2);//Draw Left
+		line(lX2, lY1, lX2, lY2);//Draw Right
+		line(lX1, lY1, lX2, lY1);//Draw Top
+		line(lX1, lY2, lX2, lY2);//Draw Bottom
+		strokeWeight(1); // Default
+		stroke(0);//BLACK
+	}else if(tilePlaceSquareCount == 2){
+		var lX1,lX2,lY1,lY2;
+		
+		if(sx1 < sx2){//if x1 is less than x2
+			lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
+			lX2 = Math.ceil(sx2 / scl) * scl;//do stuff to x?
+		}else{//otherwise
+			lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
+			lX1 = Math.floor(sx2 / scl) * scl;//do stuff to x?
+		}
+	
+		if(sy1 < sy2){//if y1 is less than y2
+			lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
+			lY2 = Math.ceil(sy2 / scl) * scl;//do stuff to x?
+		}else{//otherwise
+			lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
+			lY1 = Math.floor(sy2 / scl) * scl;//do stuff to x?
+		}
+		
+		strokeWeight(borderThickness); // Thicker
+		stroke(255,0,0);//RED
+		line(lX1, lY1, lX1, lY2);//Draw Left
+		line(lX2, lY1, lX2, lY2);//Draw Right
+		line(lX1, lY1, lX2, lY1);//Draw Top
+		line(lX1, lY2, lX2, lY2);//Draw Bottom
+		strokeWeight(1); // Default
+		stroke(0);//BLACK
+	}
 	
 	//player.update();
 	player.draw();
