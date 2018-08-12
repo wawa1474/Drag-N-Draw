@@ -246,50 +246,41 @@ function draw(){//Draw the canvas
 	
 	//BG.border();//Draw the RED border
 	
-	if(tileGroupCount == 1){
+	if(tileGroupCount > 0){
 		var lX1,lX2,lY1,lY2;
 		
-		if(sx1 < mouseX){//if x1 is less than x2
-			lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
-			lX2 = Math.ceil(mouseX / scl) * scl;//do stuff to x?
-		}else{//otherwise
-			lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
-			lX1 = Math.floor(mouseX / scl) * scl;//do stuff to x?
-		}
+		if(tileGroupCount == 1){
+			if(sx1 < mouseX){//if x1 is less than x2
+				lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
+				lX2 = Math.ceil(mouseX / scl) * scl;//do stuff to x?
+			}else{//otherwise
+				lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
+				lX1 = Math.floor(mouseX / scl) * scl;//do stuff to x?
+			}
 	
-		if(sy1 < mouseY){//if y1 is less than y2
-			lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
-			lY2 = Math.ceil(mouseY / scl) * scl;//do stuff to x?
-		}else{//otherwise
-			lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
-			lY1 = Math.floor(mouseY / scl) * scl;//do stuff to x?
-		}
-		
-		strokeWeight(borderThickness); // Thicker
-		stroke(255,0,0);//RED
-		line(lX1, lY1, lX1, lY2);//Draw Left
-		line(lX2, lY1, lX2, lY2);//Draw Right
-		line(lX1, lY1, lX2, lY1);//Draw Top
-		line(lX1, lY2, lX2, lY2);//Draw Bottom
-		strokeWeight(1); // Default
-		stroke(0);//BLACK
-	}else if(tileGroupCount == 2){
-		var lX1,lX2,lY1,lY2;
-		
-		if(sx1 < sx2){//if x1 is less than x2
-			lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
-			lX2 = Math.ceil(sx2 / scl) * scl;//do stuff to x?
-		}else{//otherwise
-			lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
-			lX1 = Math.floor(sx2 / scl) * scl;//do stuff to x?
-		}
+			if(sy1 < mouseY){//if y1 is less than y2
+				lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
+				lY2 = Math.ceil(mouseY / scl) * scl;//do stuff to x?
+			}else{//otherwise
+				lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
+				lY1 = Math.floor(mouseY / scl) * scl;//do stuff to x?
+			}
+		}else if(tileGroupCount == 2){
+			if(sx1 < sx2){//if x1 is less than x2
+				lX1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
+				lX2 = Math.ceil(sx2 / scl) * scl;//do stuff to x?
+			}else{//otherwise
+				lX2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
+				lX1 = Math.floor(sx2 / scl) * scl;//do stuff to x?
+			}
 	
-		if(sy1 < sy2){//if y1 is less than y2
-			lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
-			lY2 = Math.ceil(sy2 / scl) * scl;//do stuff to x?
-		}else{//otherwise
-			lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
-			lY1 = Math.floor(sy2 / scl) * scl;//do stuff to x?
+			if(sy1 < sy2){//if y1 is less than y2
+				lY1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
+				lY2 = Math.ceil(sy2 / scl) * scl;//do stuff to x?
+			}else{//otherwise
+				lY2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
+				lY1 = Math.floor(sy2 / scl) * scl;//do stuff to x?
+			}
 		}
 		
 		strokeWeight(borderThickness); // Thicker
@@ -657,7 +648,6 @@ function placeTile(){//Place a tile at the mouses location
 			//mapTiles[mapTiles.length] = new mTile(Math.floor(mX/scl)*scl,Math.floor(mY/scl)*scl,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
 		}
 	}
-	//console.log(mapTiles.length);//How many tiles are there?
 }//placeTile() END
 
 function tileGroup(button){//mess with tiles in square group
@@ -682,11 +672,6 @@ function tileGroup(button){//mess with tiles in square group
 	
 	XLines = (X2 - X1) / scl;//how many x lines
 	YLines = (Y2 - Y1) / scl;//how many y lines
-	
-	/*X1 = X1 - 1;//trying to fix weird bug
-	X2 = X2 + 1;
-	Y1 = Y1 - 1;
-	Y2 = Y2 + 1;*/
 	
 	for(var i = 0; i < YLines; i++){//loop through all y lines
 		for(var j = 0; j < XLines; j++){//loop through all x lines
