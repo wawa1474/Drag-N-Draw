@@ -2,6 +2,8 @@
 
 //p5.disableFriendlyErrors = true;
 
+var _DEBUG_ = 0;
+
 var dragging = false; // Is the object being dragged?
 var deleting = false;//Are we deleting tiles?
 var noTile = false;//Are we blocking placement of tiles?
@@ -20,6 +22,7 @@ var tileN = 1;//Which tile is the cursor over?
 var drawnTiles = 0;//how many tiles are on the screen
 var drawAll = false;//draw all tiles even if not on screen?
 var FPSCutOff = 2;//how many digits of fps to show
+var operationTime = 0;//how long to complete an action?
 
 var tileGroupStep = 0;//what step are we in setting tile group
 var tileGroupDeleting = false;//are we deleting the tile group
@@ -75,6 +78,12 @@ function preload(){//Preload all of the images
 function setup(){//Setup everything
 	createCanvas(cols*scl,rows*scl);//(Width, Height)
 	UI.setup();//Setup all of the UI stuff
+	
+	if(_DEBUG_ == 1){
+		for(var i = 0; i < 50000; i++){
+			mapTiles[mapTiles.length] = new mTile(scl*90,scl*90,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Create a tile
+		}
+	}
 }//setup() END
 
 function NextButtonC(){//Next Row
@@ -205,6 +214,9 @@ function updateXY(){//Update the XY position of the mouse and the page XY offset
 }//updateXY() END
 
 function draw(){//Draw the canvas
+	if(_DEBUG_ != 0){
+		operationTime = Date.now();
+	}
 	drawnTiles = 0;//reset number of drawn tiles
 
 	updateXY();//Update the XY position of the mouse and the page XY offset
@@ -225,7 +237,7 @@ function draw(){//Draw the canvas
 
 	//Display Map Tiles
 	for(var i = 0; i < mapTiles.length; i++){//Go through all the tiles
-		if(mapTiles[i].x > pX - scl && mapTiles[i].x  < windowWidth + pX && mapTiles[i].y > pY && mapTiles[i].y < windowHeight + pY || drawAll == true){//if tile is within screen bounds or drawAll is set
+		if(mapTiles[i].x > pX - scl && mapTiles[i].x  < windowWidth + pX && mapTiles[i].y > pY - 1 && mapTiles[i].y < windowHeight + pY || drawAll == true){//if tile is within screen bounds or drawAll is set
 			if(!mapTiles[i].clear || mapTiles[i].image == 0){//Is the tile colored
 				fill(mapTiles[i].r,mapTiles[i].g,mapTiles[i].b);//Set Tile background color
 				rect(mapTiles[i].x,mapTiles[i].y,scl,scl);//Draw colored square behind tile
@@ -233,7 +245,7 @@ function draw(){//Draw the canvas
 			if(mapTiles[i].image != 0 && mapTiles[i].image <= totalImages){//if tile image is not 0 and tile image exists
 				image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
 			}
-		drawnTiles++;//how tiles are being drawn?
+			drawnTiles++;//how many tiles are being drawn?
 		}
 	}//Went through all the tiles
 
@@ -251,7 +263,19 @@ function draw(){//Draw the canvas
 	
 	//player.update();
 	player.draw();
+	if(_DEBUG_ != 0){
+		operationDisplay();
+	}
 }//Draw() END
+
+function operationDisplay(){
+	fill(255,0,0);//red text
+	stroke(0);//no outline
+	textSize(24);//larger text size
+	operationTime = Date.now() - operationTime;
+	text("oT: " + operationTime, ((scl * 22) + scl / 2.25) + pX, (scl * 1.75) + pY);//oT: (oT)
+	textSize(12);//Default text size
+}
 
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
@@ -855,6 +879,7 @@ function tileUI(){//The tile UI
 		PrevButton.mousePressed(PrevButtonC);//The function to run when pressed
 		
 		fileNameInput = createInput(fileName);
+		fileNameInput.style('width', scl*3.5+'px');//Width of input box
 		fileNameInput.input(function fileNameInputF(){fileName = this.value(); /* console.log(this.value()); */});
 		
 		//loreInputArea = createElememt('textarea', 'Some text to start initially.');
