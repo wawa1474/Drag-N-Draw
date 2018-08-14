@@ -104,7 +104,6 @@ function nextRowC(){//Next Row
 	}else{
 		tileN += rowLength;//Keep the selected tile number in the same relative position
 		if(tileN > fullTotalImages){//If the tile number is greater than our total number of tiles
-			console.log(tileN);
 			tileN = tileN - (fullTotalImages + 1);//Loop the tile number back to first row in the same relative position
 		}
 	}
