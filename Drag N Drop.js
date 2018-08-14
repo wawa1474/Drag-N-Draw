@@ -55,6 +55,8 @@ var img = [];//Tile Images Array
 var mapTiles = [];//Map Tiles Array
 var Background;//background image
 
+var missingTexture;
+
 var mapTable;//Map Table
 var fileNameInput;//File Name Input
 var fileName = 'Map1';//File Name
@@ -68,12 +70,14 @@ var BG = new BGFunc();//Create a background
 var borderThickness = 4;//how thick is the canvas border
 
 function preload(){//Preload all of the images
+	missingTexture = loadImage('assets/' + 'missingTexture' + '.png');//And load them
+
 	for(var i = 0; i <= totalImages; i++){//Go through all the images
 		img[i] = loadImage('assets/' + i + '.png');//And load them
 	}//Went through all the images
 	
 	for(var i = totalImages + 1; i <= fullTotalImages; i++){
-		img[i] = loadImage('assets/' + tileBorderNumber + '.png');//And load them
+		img[i] = missingTexture;
 	}
 	
 	player.image = loadImage('assets/Player.png');//Player Image
@@ -94,7 +98,7 @@ function setup(){//Setup everything
 	}
 }//setup() END
 
-function NextButtonC(){//Next Row
+function nextRowC(){//Next Row
 	if(tileN < rowLength*tileRow || tileN > rowLength*tileRow+rowLength){//Is tileN outside of our current row
 		//Do Nothing
 	}else{
@@ -107,9 +111,9 @@ function NextButtonC(){//Next Row
 	if(tileRow > fullTotalImages/*totalImages*//rowLength){//If the row number is greater than our total number of rows
 		tileRow = 0;//Loop the row number back to the first
 	}
-}//NextButtonC() END
+}//nextRowC() END
 
-function PrevButtonC(){//Previous Row
+function prevRowC(){//Previous Row
 	if(tileN < rowLength*tileRow || tileN > rowLength*tileRow+rowLength){//Is tileN outside of our current row
 		//Do Nothing
 	}else{
@@ -122,7 +126,7 @@ function PrevButtonC(){//Previous Row
 	if(tileRow < 0){//If the row number is less than our zero
 		tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the row number back to the last
 	}
-}//PrevButtonC() END
+}//prevRowC() END
 
 function SaveCanvas(){//Save the canvas to local storage
 	var MapJSON = JSON.stringify(mapTiles);//Ready the map for storage
@@ -252,6 +256,8 @@ function draw(){//Draw the canvas
 			}
 			if(mapTiles[i].image != 0 && mapTiles[i].image <= totalImages){//if tile image is not 0 and tile image exists
 				image(img[mapTiles[i].image], mapTiles[i].x, mapTiles[i].y);//Draw tile
+			}else if(mapTiles[i].image != 0){
+				image(missingTexture, mapTiles[i].x, mapTiles[i].y);//Draw tile
 			}
 			drawnTiles++;//how many tiles are being drawn?
 		}
@@ -424,12 +430,21 @@ function mouseReleased(){//We released the mouse button
 	}
 }//mouseReleased() END
 
+function mouseWheel(event){//We Scrolled The Mouse Wheel
+	if(event.delta < 0){//If Scrolling Up
+		nextTileC();//Move To Next Tile
+	}else{
+		prevTileC();//Move To Previous Tile
+	}
+  return false;//Block Scrolling
+}//mouseWheel(event) END
+
 function keyPressed(){//We pressed a key
 	//console.log(keyCode);//What key did we press?
 	if (keyCode == /*SHIFT*/16){//We pressed shift
-		PrevButtonC();//Previous Tile row
+		prevRowC();//Previous Tile row
 	}else if (keyCode == /*SPACE*/32){//We pressed space
-		NextButtonC();//Next Tile Row
+		nextRowC();//Next Tile Row
 		return false;//Block normal action
 	}/*else if (keyCode == 40){//We pressed down
 		player.move('DOWN');//Move Player Down
@@ -448,31 +463,9 @@ function keyPressed(){//We pressed a key
 
 function keyTyped(){//We typed a key
 	if(key == 'q'){//We pressed 'Q'
-		updateTileRow();//Get the row to whatever tile were on
-		tileN--;//Decrement the tile number
-		if(tileN < 0){//Is the tile number less than zero?
-			tileN = fullTotalImages/*totalImages + 1*/;//Loop the tile number back to the last tile
-			tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the tile row back to the last row
-		}
-		if(tileN < rowLength*tileRow){//Is the tile number less than the lower end of the current row?
-			tileRow--;//Decrement the tile row
-			if(tileRow < 0){//Is the tile number less than zero?
-				tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the tile row back to the last row
-			}
-		}
+		prevTileC();
 	}else if(key == 'e'){//We pressed 'E'
-		updateTileRow();//Get the row to whatever tile were on
-		tileN++;//Increment the tile number
-		if(tileN > fullTotalImages/*totalImages + 1*/){//Is the tile number greater than our total number of images?
-			tileN = 0;//Loop the tile number back to the first tile
-			tileRow = 0;//Loop the tile row back to the first row
-		}
-		if(tileN == rowLength*(tileRow+1)){//If the tile number is the last tile
-			tileRow++;//Increment the tile row
-			if(tileRow > fullTotalImages/*totalImages*//rowLength){//Is the tile row greater than our total number of rows?
-				tileRow = 0;//Loop the tile row back to the first row
-			}
-		}
+		nextTileC();
 	}else if(key == 'w'){//We pressed 'W'
 		SY = window.pageYOffset - (scl * scrollAmount);//Scroll Screen UP
 	}else if(key == 'a'){//We pressed 'A'
@@ -490,9 +483,9 @@ function keyTyped(){//We typed a key
 			CCheckBox.checked(true);//Check the checkbox
 		}
 	}else if(key == 'z'){//We pressed 'Z'
-		PrevButtonC();//Previous Tile row
+		prevRowC();//Previous Tile row
 	}else if(key == 'x'){//We pressed 'X'
-		NextButtonC();//Next Tile Row
+		nextRowC();//Next Tile Row
 	}/*else if(key == 'f'){//We pressed 'F'
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
 			if(isCursorOnTile(i)){//Are we clicking on the tile
@@ -539,6 +532,36 @@ function keyTyped(){//We typed a key
 		}
 	}
 }//keyTyped() END
+
+function nextTileC(){//Move To Next Tile
+	updateTileRow();//Get the row to whatever tile were on
+	tileN++;//Increment the tile number
+	if(tileN > fullTotalImages/*totalImages + 1*/){//Is the tile number greater than our total number of images?
+		tileN = 0;//Loop the tile number back to the first tile
+		tileRow = 0;//Loop the tile row back to the first row
+	}
+	if(tileN == rowLength*(tileRow+1)){//If the tile number is the last tile
+		tileRow++;//Increment the tile row
+		if(tileRow > fullTotalImages/*totalImages*//rowLength){//Is the tile row greater than our total number of rows?
+			tileRow = 0;//Loop the tile row back to the first row
+		}
+	}
+}//nextTileC() END
+
+function prevTileC(){//Move To Previous Tile
+	updateTileRow();//Get the row to whatever tile were on
+	tileN--;//Decrement the tile number
+	if(tileN < 0){//Is the tile number less than zero?
+		tileN = fullTotalImages/*totalImages + 1*/;//Loop the tile number back to the last tile
+		tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the tile row back to the last row
+	}
+	if(tileN < rowLength*tileRow){//Is the tile number less than the lower end of the current row?
+		tileRow--;//Decrement the tile row
+		if(tileRow < 0){//Is the tile number less than zero?
+			tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the tile row back to the last row
+		}
+	}
+}//prevTileC() END
 
 function updateTileRow(){//Get the row to whatever tile were on
 	while(Math.floor(tileN/rowLength)*rowLength < rowLength*tileRow){//Is tileN lower than the row were on?
@@ -882,9 +905,9 @@ function tileUI(){//The tile UI
 		FileLoadButton = createButton('File');//createFileInput 'Load File'
 		FileLoadButton.mousePressed(FileLoadMap);//The function to run when pressed
 		NextButton = createButton('Next');//Text of button
-		NextButton.mousePressed(NextButtonC);//The function to run when pressed
+		NextButton.mousePressed(nextRowC);//The function to run when pressed
 		PrevButton = createButton('Prev');//Text of button
-		PrevButton.mousePressed(PrevButtonC);//The function to run when pressed
+		PrevButton.mousePressed(prevRowC);//The function to run when pressed
 		
 		fileNameInput = createInput(fileName);
 		fileNameInput.style('width', scl*3.5+'px');//Width of input box

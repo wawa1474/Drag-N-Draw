@@ -22,13 +22,13 @@ Welcome to the Drag-N-Draw wiki!
 
 	\-Delete Tile
 		|--When Clicking On Existing Tile
+
 ### Right:
 	\-Recolor tile
 		|--When Clicking On Existing Tile
 
-
-
-
+### Scroll:
+	\-Switch Which Tile We're Placing
 
 ***
 
