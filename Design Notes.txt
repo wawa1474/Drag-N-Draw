@@ -6,7 +6,7 @@ Welcome to the Drag-N-Draw wiki!
 # Mouse
 ### Left:
 	\-Place Selected Tile
-		|--When Not Clicking On Existing Tile
+		|--When Not Clicking On Existing Tile Or Placing Clear Tile
 		|--With Color When Not Clear
 
 	\-Move Tile
@@ -42,11 +42,14 @@ Welcome to the Drag-N-Draw wiki!
 ### QE:
 	\-Change Selected Tile
 
-### Z-X/Space-Shift:
+### ZX/Space-Shift:
 	\-Change Tile Row
 
 ### C:
 	\-Toggle Tile Clear
+
+### R:
+	\-Console Log The Properties Of The Tile The Mouse Is Over
 	
 ### P:
 	\-Set tile group XY1 and XY2

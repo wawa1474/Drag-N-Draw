@@ -3,6 +3,7 @@
 //p5.disableFriendlyErrors = true;
 
 var _DEBUG_ = 0;
+var _DEBUGAMOUNT_ = 50000;
 
 var dragging = false; // Is the object being dragged?
 var deleting = false;//Are we deleting tiles?
@@ -18,6 +19,8 @@ var NextButton, PrevButton;//Next and Previous row buttons
 var rowLength = 16;//How many tiles per row?
 var tileRow = 0;//Which row of tiles are we looking at?
 var tileN = 1;//Which tile is the cursor over?
+
+var fullTotalImages = (Math.ceil(totalImages / rowLength) * rowLength) - 1;
 
 var drawnTiles = 0;//how many tiles are on the screen
 var drawAll = false;//draw all tiles even if not on screen?
@@ -58,7 +61,7 @@ var fileName = 'Map1';//File Name
 
 //var loreInputArea;
 
-var player = new player();//Player
+//var player = new player();//Player
 
 var UI = new tileUI();//Create a UI
 var BG = new BGFunc();//Create a background
@@ -68,6 +71,10 @@ function preload(){//Preload all of the images
 	for(var i = 0; i <= totalImages; i++){//Go through all the images
 		img[i] = loadImage('assets/' + i + '.png');//And load them
 	}//Went through all the images
+	
+	for(var i = totalImages + 1; i <= fullTotalImages; i++){
+		img[i] = loadImage('assets/' + tileBorderNumber + '.png');//And load them
+	}
 	
 	player.image = loadImage('assets/Player.png');//Player Image
 	Background = loadImage('assets/Background.png');//Player Image
@@ -80,7 +87,8 @@ function setup(){//Setup everything
 	UI.setup();//Setup all of the UI stuff
 	
 	if(_DEBUG_ == 1){
-		for(var i = 0; i < 50000; i++){
+		mapTiles = [];
+		for(var i = 0; i < _DEBUGAMOUNT_; i++){
 			mapTiles[mapTiles.length] = new mTile(scl*90,scl*90,tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Create a tile
 		}
 	}
@@ -91,12 +99,12 @@ function NextButtonC(){//Next Row
 		//Do Nothing
 	}else{
 		tileN += rowLength;//Keep the selected tile number in the same relative position
-		if(tileN > totalImages + 1){//If the tile number is greater than our total number of tiles
-			tileN = tileN - (totalImages + 2);//Loop the tile number back to first row in the same relative position
+		if(tileN > fullTotalImages/*totalImages*/ + 1){//If the tile number is greater than our total number of tiles
+			tileN = tileN - (fullTotalImages/*totalImages*/ + 1/*2*/);//Loop the tile number back to first row in the same relative position
 		}
 	}
 	tileRow++;//Increment the row number
-	if(tileRow > totalImages/rowLength){//If the row number is greater than our total number of rows
+	if(tileRow > fullTotalImages/*totalImages*//rowLength){//If the row number is greater than our total number of rows
 		tileRow = 0;//Loop the row number back to the first
 	}
 }//NextButtonC() END
@@ -107,12 +115,12 @@ function PrevButtonC(){//Previous Row
 	}else{
 		tileN -= rowLength;//Keep the selected tile number in the same relative position
 		if(tileN < 0){//If the tile number is less than zero
-			tileN = (totalImages + 2) - (0 - tileN);//Loop the tile number back to last row in the same relative position
+			tileN = (fullTotalImages/*totalImages*/ + 1/*2*/) - (0 - tileN);//Loop the tile number back to last row in the same relative position
 		}
 	}
 	tileRow--;//Decrement the row number
 	if(tileRow < 0){//If the row number is less than our zero
-		tileRow = Math.floor(totalImages/rowLength);//Loop the row number back to the last
+		tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the row number back to the last
 	}
 }//PrevButtonC() END
 
@@ -262,7 +270,7 @@ function draw(){//Draw the canvas
 	}
 	
 	//player.update();
-	player.draw();
+	//player.draw();
 	if(_DEBUG_ != 0){
 		operationDisplay();
 	}
@@ -332,7 +340,7 @@ function mousePressed(){//We pressed a mouse button
 				mapN = null;//We're not holding a tile
 				deleting = true;//We're deleting
 				return false;//Block normal action
-			}else if(mouseButton == LEFT){//We clicked with the left button
+			}else if(mouseButton == LEFT && !CClear){//We clicked with the left button
 				mapN = i;//Keep track of what tile we clicked on
 				dragging = true;//We dragging
 				updateOffset(i);//Update the mouse offset of the tile
@@ -423,7 +431,7 @@ function keyPressed(){//We pressed a key
 	}else if (keyCode == /*SPACE*/32){//We pressed space
 		NextButtonC();//Next Tile Row
 		return false;//Block normal action
-	}else if (keyCode == 40){//We pressed down
+	}/*else if (keyCode == 40){//We pressed down
 		player.move('DOWN');//Move Player Down
 		return false;//Block normal action
 	}else if (keyCode == 38){//We pressed up
@@ -435,7 +443,7 @@ function keyPressed(){//We pressed a key
 	}else if (keyCode == 39){//We pressed right
 		player.move('RIGHT');//Move Player Right
 		return false;//Block normal action
-	}
+	}*/
 }
 
 function keyTyped(){//We typed a key
@@ -443,25 +451,25 @@ function keyTyped(){//We typed a key
 		updateTileRow();//Get the row to whatever tile were on
 		tileN--;//Decrement the tile number
 		if(tileN < 0){//Is the tile number less than zero?
-			tileN = totalImages + 1;//Loop the tile number back to the last tile
-			tileRow = Math.floor(totalImages/rowLength);//Loop the tile row back to the last row
+			tileN = fullTotalImages/*totalImages + 1*/;//Loop the tile number back to the last tile
+			tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the tile row back to the last row
 		}
 		if(tileN < rowLength*tileRow){//Is the tile number less than the lower end of the current row?
 			tileRow--;//Decrement the tile row
 			if(tileRow < 0){//Is the tile number less than zero?
-				tileRow = Math.floor(totalImages/rowLength);//Loop the tile row back to the last row
+				tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the tile row back to the last row
 			}
 		}
 	}else if(key == 'e'){//We pressed 'E'
 		updateTileRow();//Get the row to whatever tile were on
 		tileN++;//Increment the tile number
-		if(tileN > totalImages + 1){//Is the tile number greater than our total number of images?
+		if(tileN > fullTotalImages/*totalImages + 1*/){//Is the tile number greater than our total number of images?
 			tileN = 0;//Loop the tile number back to the first tile
 			tileRow = 0;//Loop the tile row back to the first row
 		}
 		if(tileN == rowLength*(tileRow+1)){//If the tile number is the last tile
 			tileRow++;//Increment the tile row
-			if(tileRow > totalImages/rowLength){//Is the tile row greater than our total number of rows?
+			if(tileRow > fullTotalImages/*totalImages*//rowLength){//Is the tile row greater than our total number of rows?
 				tileRow = 0;//Loop the tile row back to the first row
 			}
 		}
@@ -485,14 +493,14 @@ function keyTyped(){//We typed a key
 		PrevButtonC();//Previous Tile row
 	}else if(key == 'x'){//We pressed 'X'
 		NextButtonC();//Next Tile Row
-	}else if(key == 'f'){//We pressed 'F'
+	}/*else if(key == 'f'){//We pressed 'F'
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
 			if(isCursorOnTile(i)){//Are we clicking on the tile
 				loadTile(i);//Load tileN with whatever tile we just checked
 				updateTileRow();//Get the row to whatever tile we're on
 			}
 		}
-	}else if(key == 'i'){//We pressed 'I'
+	}*/else if(key == 'i'){//We pressed 'I'
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
 			mapTiles[i].y -= scl * scrollAmount;//Move tile up 1 space
 		}
@@ -518,7 +526,7 @@ function keyTyped(){//We typed a key
 				//console.log('Tile Lore: ' + mapTiles[i].lore);
 			}
 		}
-	}else if(key == 'p'){//We pressed 'R'
+	}else if(key == 'p'){//We pressed 'P'
 		//tileGroup(scl * 10, scl * 3, scl * 5, scl * 10)
 		if(tileGroupStep == 0){//set XY1
 			tileGroupStep = 1;//ready for next step
@@ -779,7 +787,7 @@ function tileUI(){//The tile UI
 		fill(255);//Set background color to white
 		rect(pX, pY, scl*rowLength, scl);//Create rectangle behind tiles UI
 		for(var i = 0; i < rowLength; i++){//Go through all the tiles
-			if(rowLength*tileRow+i <= totalImages){//If tile exists
+			if(rowLength*tileRow+i <= fullTotalImages/*totalImages*/){//If tile exists
 				if(rowLength*tileRow+i == tileN){//If displaying selected tile
 					fill(RSlider.value(),GSlider.value(),BSlider.value());//Set background color to the RGB value set by user
 					rect(scl*i + pX, pY, scl, scl);//Display color behind the tile
