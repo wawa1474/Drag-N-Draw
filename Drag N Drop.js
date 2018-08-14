@@ -282,14 +282,14 @@ function draw(){//Draw the canvas
 	}
 }//Draw() END
 
-function operationDisplay(){
+function operationDisplay(){//Display Time It Took Too Do That Operation
 	fill(255,0,0);//red text
 	stroke(0);//no outline
 	textSize(24);//larger text size
-	operationTime = Date.now() - operationTime;
+	operationTime = Date.now() - operationTime;//how long it took
 	text("oT: " + operationTime, ((scl * 22) + scl / 2.25) + pX, (scl * 1.75) + pY);//oT: (oT)
 	textSize(12);//Default text size
-}
+}//operationDisplay() END
 
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
@@ -635,7 +635,7 @@ function checkImage(tile){//check if tile about to place has same image as tile 
 	return true;//Place tile
 }//checkImage() END
 
-function checkImageXY(tile, x, y){
+function checkImageXY(tile, x, y){//check if tile about to place has same image as tile mouse is on
 	for(var i = mapTiles.length - 1; i >= 0; i--){//Go through all tiles
 		if(isCursorOnTileXY(i, x, y)){//Is XY on the tile we're checking?
 			if(tile == mapTiles[i].image){//Is the tile image we're on the same as the one we're trying to place?
@@ -661,15 +661,15 @@ function placeTile(){//Place a tile at the mouses location
 	}
 }//placeTile() END
 
-function drawTileGroupOutline(){
-	var X1,X2,Y1,Y2,asx2,asy2;
+function drawTileGroupOutline(){//Draw Red Outline Showing Selected Area
+	var X1,X2,Y1,Y2,asx2,asy2;//Setup Variables
 		
-	if(tileGroupStep == 1){
-		asx2 = mouseX;
-		asy2 = mouseY;
-	}else if(tileGroupStep == 2){
-		asx2 = sx2;
-		asy2 = sy2;
+	if(tileGroupStep == 1){//Are We On Step One
+		asx2 = mouseX;//Corner is tied to mouse
+		asy2 = mouseY;//Corner is tied to mouse
+	}else if(tileGroupStep == 2){//Are We On Step Two
+		asx2 = sx2;//Corner is tied to set XY
+		asy2 = sy2;//Corner is tied to set XY
 	}
 		
 	if(sx1 < asx2){//if x1 is less than x2
@@ -696,7 +696,7 @@ function drawTileGroupOutline(){
 	line(X1, Y2, X2, Y2);//Draw Bottom
 	strokeWeight(1); // Default
 	stroke(0);//BLACK
-}
+}//drawTileGroupOutline() END
 
 function tileGroup(button){//mess with tiles in square group
 	var X1, X2, Y1, Y2;//define XY positions
@@ -725,14 +725,12 @@ function tileGroup(button){//mess with tiles in square group
 	for(var i = 0; i < YLines; i++){//loop through all y lines
 		for(var j = 0; j < XLines; j++){//loop through all x lines
 			if(button == 'left'){//we clicked left button
-				//if(checkImageXY(tileN, X1 + (scl * j),Y1 + (scl * i)) == true){
 				mapTiles[mapTiles.length] = new mTile(X1 + (scl * j),Y1 + (scl * i),tileN,RSlider.value(),GSlider.value(),BSlider.value(), CClear);//Place a tile
-				//}
 			}else if(button == 'center' && tileGroupDeleting == true){//we clicked middle button on a tile
 				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
 					if(isCursorOnTileXY(k, (X1 + (scl * j)) + 4, (Y1 + (scl * i)) + 4)){//Are we clicking on the tile
 						deleteTile(k);//delete the tile
-						k--;
+						k--;//We need to recheck that tile
 					}
 				}
 			}else if(button == 'center'){//we clicked middle button
