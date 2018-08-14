@@ -2,8 +2,8 @@
 
 //p5.disableFriendlyErrors = true;
 
-var _DEBUG_ = 0;
-var _DEBUGAMOUNT_ = 50000;
+var _DEBUG_ = 0;//what are we debugging
+var _DEBUGAMOUNT_ = 50000;//how many are we debugging
 
 var dragging = false; // Is the object being dragged?
 var deleting = false;//Are we deleting tiles?
@@ -20,7 +20,7 @@ var rowLength = 16;//How many tiles per row?
 var tileRow = 0;//Which row of tiles are we looking at?
 var tileN = 1;//Which tile is the cursor over?
 
-var fullTotalImages = (Math.ceil(totalImages / rowLength) * rowLength) - 1;
+var fullTotalImages = (Math.ceil(totalImages / rowLength) * rowLength) - 1;//make sure all tile rows are full
 
 var drawnTiles = 0;//how many tiles are on the screen
 var drawAll = false;//draw all tiles even if not on screen?
@@ -55,7 +55,7 @@ var img = [];//Tile Images Array
 var mapTiles = [];//Map Tiles Array
 var Background;//background image
 
-var missingTexture;
+var missingTexture;//missingTexture Image
 
 var mapTable;//Map Table
 var fileNameInput;//File Name Input
@@ -673,19 +673,19 @@ function drawTileGroupOutline(){//Draw Red Outline Showing Selected Area
 	}
 		
 	if(sx1 < asx2){//if x1 is less than x2
-		X1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
-		X2 = Math.ceil(asx2 / scl) * scl;//do stuff to x?
+		X1 = Math.floor(sx1 / scl) * scl;//Adjust XY To Be On Tile Border
+		X2 = Math.ceil(asx2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}else{//otherwise
-		X2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
-		X1 = Math.floor(asx2 / scl) * scl;//do stuff to x?
+		X2 = Math.ceil(sx1 / scl) * scl;//Adjust XY To Be On Tile Border
+		X1 = Math.floor(asx2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}
 	
 	if(sy1 < asy2){//if y1 is less than y2
-		Y1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
-		Y2 = Math.ceil(asy2 / scl) * scl;//do stuff to x?
+		Y1 = Math.floor(sy1 / scl) * scl;//Adjust XY To Be On Tile Border
+		Y2 = Math.ceil(asy2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}else{//otherwise
-		Y2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
-		Y1 = Math.floor(asy2 / scl) * scl;//do stuff to x?
+		Y2 = Math.ceil(sy1 / scl) * scl;//Adjust XY To Be On Tile Border
+		Y1 = Math.floor(asy2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}
 		
 	strokeWeight(borderThickness); // Thicker
@@ -704,19 +704,19 @@ function tileGroup(button){//mess with tiles in square group
 	var stillTiles = false;
 	
 	if(sx1 < sx2){//if x1 is less than x2
-		X1 = Math.floor(sx1 / scl) * scl;//do stuff to x?
-		X2 = Math.ceil(sx2 / scl) * scl;//do stuff to x?
+		X1 = Math.floor(sx1 / scl) * scl;//Adjust XY To Be On Tile Border
+		X2 = Math.ceil(sx2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}else{//otherwise
-		X2 = Math.ceil(sx1 / scl) * scl;//do stuff to x?
-		X1 = Math.floor(sx2 / scl) * scl;//do stuff to x?
+		X2 = Math.ceil(sx1 / scl) * scl;//Adjust XY To Be On Tile Border
+		X1 = Math.floor(sx2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}
 	
 	if(sy1 < sy2){//if y1 is less than y2
-		Y1 = Math.floor(sy1 / scl) * scl;//do stuff to x?
-		Y2 = Math.ceil(sy2 / scl) * scl;//do stuff to x?
+		Y1 = Math.floor(sy1 / scl) * scl;//Adjust XY To Be On Tile Border
+		Y2 = Math.ceil(sy2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}else{//otherwise
-		Y2 = Math.ceil(sy1 / scl) * scl;//do stuff to x?
-		Y1 = Math.floor(sy2 / scl) * scl;//do stuff to x?
+		Y2 = Math.ceil(sy1 / scl) * scl;//Adjust XY To Be On Tile Border
+		Y1 = Math.floor(sy2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}
 	
 	XLines = (X2 - X1) / scl;//how many x lines
