@@ -99,32 +99,33 @@ function setup(){//Setup everything
 }//setup() END
 
 function nextRowC(){//Next Row
-	if(tileN < rowLength*tileRow || tileN > rowLength*tileRow+rowLength){//Is tileN outside of our current row
+	if(tileN < rowLength * tileRow || tileN > rowLength * tileRow + rowLength){//Is tileN outside of our current row
 		//Do Nothing
 	}else{
 		tileN += rowLength;//Keep the selected tile number in the same relative position
-		if(tileN > fullTotalImages/*totalImages*/ + 1){//If the tile number is greater than our total number of tiles
-			tileN = tileN - (fullTotalImages/*totalImages*/ + 1/*2*/);//Loop the tile number back to first row in the same relative position
+		if(tileN > fullTotalImages){//If the tile number is greater than our total number of tiles
+			console.log(tileN);
+			tileN = tileN - (fullTotalImages + 1);//Loop the tile number back to first row in the same relative position
 		}
 	}
 	tileRow++;//Increment the row number
-	if(tileRow > fullTotalImages/*totalImages*//rowLength){//If the row number is greater than our total number of rows
+	if(tileRow > fullTotalImages / rowLength){//If the row number is greater than our total number of rows
 		tileRow = 0;//Loop the row number back to the first
 	}
 }//nextRowC() END
 
 function prevRowC(){//Previous Row
-	if(tileN < rowLength*tileRow || tileN > rowLength*tileRow+rowLength){//Is tileN outside of our current row
+	if(tileN < rowLength * tileRow || tileN > rowLength * tileRow + rowLength){//Is tileN outside of our current row
 		//Do Nothing
 	}else{
 		tileN -= rowLength;//Keep the selected tile number in the same relative position
 		if(tileN < 0){//If the tile number is less than zero
-			tileN = (fullTotalImages/*totalImages*/ + 1/*2*/) - (0 - tileN);//Loop the tile number back to last row in the same relative position
+			tileN = (fullTotalImages + 1) - (0 - tileN);//Loop the tile number back to last row in the same relative position
 		}
 	}
 	tileRow--;//Decrement the row number
 	if(tileRow < 0){//If the row number is less than our zero
-		tileRow = Math.floor(fullTotalImages/*totalImages*//rowLength);//Loop the row number back to the last
+		tileRow = Math.floor(fullTotalImages / rowLength);//Loop the row number back to the last
 	}
 }//prevRowC() END
 
