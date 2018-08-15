@@ -55,6 +55,8 @@ var img = [];//Tile Images Array
 var mapTiles = [];//Map Tiles Array
 var Background;//background image
 
+var mapTilesCopy = [];
+
 var missingTexture;//missingTexture Image
 
 var mapTable;//Map Table
@@ -484,15 +486,15 @@ function keyTyped(){//We typed a key
 		}
 	}else if(key == 'x'){//We pressed 'X'
 		if(tileGroupStep == 2){
-			//cut group selection
+			tileGroupPaste('x');//cut group selection
 		}
 	}else if(key == 'c'){//We pressed 'C'
 		if(tileGroupStep == 2){
-			//copy group selection
+			tileGroupPaste('c');//copy group selection
 		}
 	}else if(key == 'v'){//We pressed 'V'
 		if(tileGroupStep == 2){
-			//paste group selection
+			tileGroupPaste('v');//paste group selection
 		}
 	}else if(key == 'i'){//We pressed 'I'
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
@@ -750,6 +752,60 @@ function tileGroup(button){//mess with tiles in square group
 	tileGroupStep = 0;//reset step count
 	tileGroupDeleting = false;//no longer deleting
 }//placeTile() END
+
+function tileGroupPaste(button){//mess with tiles in square group
+	var X1, X2, Y1, Y2;//define XY positions
+	var XLines, YLines;//define number of XY lines
+	var tileCount = 0;
+	
+	if(sx1 < sx2){//if x1 is less than x2
+		X1 = Math.floor(sx1 / scl) * scl;//Adjust XY To Be On Tile Border
+		X2 = Math.ceil(sx2 / scl) * scl;//Adjust XY To Be On Tile Border
+	}else{//otherwise
+		X2 = Math.ceil(sx1 / scl) * scl;//Adjust XY To Be On Tile Border
+		X1 = Math.floor(sx2 / scl) * scl;//Adjust XY To Be On Tile Border
+	}
+	
+	if(sy1 < sy2){//if y1 is less than y2
+		Y1 = Math.floor(sy1 / scl) * scl;//Adjust XY To Be On Tile Border
+		Y2 = Math.ceil(sy2 / scl) * scl;//Adjust XY To Be On Tile Border
+	}else{//otherwise
+		Y2 = Math.ceil(sy1 / scl) * scl;//Adjust XY To Be On Tile Border
+		Y1 = Math.floor(sy2 / scl) * scl;//Adjust XY To Be On Tile Border
+	}
+	
+	XLines = (X2 - X1) / scl;//how many x lines
+	YLines = (Y2 - Y1) / scl;//how many y lines
+	
+	for(var i = 0; i < YLines; i++){//loop through all y lines
+		for(var j = 0; j < XLines; j++){//loop through all x lines
+			if(button == 'x'){//we clicked middle button on a tile
+				tileCount = 0;
+				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
+					if(isCursorOnTileXY(k, (X1 + (scl * j)) + 4, (Y1 + (scl * i)) + 4)){//Are we clicking on the tile
+						mapTilesCopy[tileCount] = mapTiles[k];
+						tileCount++;
+						deleteTile(k);//delete the tile
+						k--;//We need to recheck that tile
+					}
+				}
+			}else if(button == 'c'){//we clicked right button
+				tileCount = 0;
+				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
+					if(isCursorOnTileXY(k, (X1 + (scl * j)) + 4, (Y1 + (scl * i)) + 4)){//Are we clicking on the tile
+						mapTilesCopy[tileCount] = mapTiles[k];
+						tileCount++;
+					}
+				}
+			}else if(button == 'v'){//we clicked middle button
+				for(var k = 0; k <= mapTilesCopy.length-1; k++){//loop through all tiles
+					mapTiles[mapTiles.length] = mapTilesCopy[k];
+				}
+			}
+		}
+	}
+	tileGroupStep = 0;//reset step count
+}//tileGroupPaste() END
 
 function deleteTile(tile){//Delete a tile and update the array
 	if(mapTiles.length > 1){//If there is more than 1 tile
