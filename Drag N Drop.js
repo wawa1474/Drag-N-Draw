@@ -30,6 +30,8 @@ var operationTime = 0;//how long to complete an action?
 var tileGroupStep = 0;//what step are we in setting tile group
 var tileGroupDeleting = false;//are we deleting the tile group
 var sx1, sy1, sx2, sy2;//tileGroup XY corners
+var tileGroupXLines = 0;
+var tileGroupYLines = 0;
 
 var tileBorderNumber = 0;//What number in img[] is the border (its just a null tile)
 
@@ -273,8 +275,12 @@ function draw(){//Draw the canvas
 	
 	//BG.border();//Draw the RED border
 	
-	if(tileGroupStep > 0){
+	if(tileGroupStep > 0 && tileGroupStep != 3){
 		drawTileGroupOutline();
+	}
+	
+	if(tileGroupStep == 3){
+		drawGroupPasteOutline();
 	}
 	
 	//player.update();
@@ -295,6 +301,15 @@ function operationDisplay(){//Display Time It Took Too Do That Operation
 
 function mousePressed(){//We pressed a mouse button
 	//updateXY();
+	
+	if(tileGroupStep == 3){
+		if(mouseButton == LEFT){
+			tileGroupPaste();//paste group selection
+			tileGroupStep = 0;
+			return false;
+		}
+	}
+	
 	if(tileGroupStep == 2){//placing group of tiles
 		if(mouseButton == LEFT){//We clicked with the left button
 			tileGroup('left');//placing image tiles
@@ -486,16 +501,14 @@ function keyTyped(){//We typed a key
 		}
 	}else if(key == 'x'){//We pressed 'X'
 		if(tileGroupStep == 2){
-			tileGroupPaste('x');//cut group selection
+			tileGroupCutCopy('x');//cut group selection
 		}
 	}else if(key == 'c'){//We pressed 'C'
 		if(tileGroupStep == 2){
-			tileGroupPaste('c');//copy group selection
+			tileGroupCutCopy('c');//copy group selection
 		}
 	}else if(key == 'v'){//We pressed 'V'
-		if(tileGroupStep == 2){
-			tileGroupPaste('v');//paste group selection
-		}
+		tileGroupStep = 3;//paste step count
 	}else if(key == 'i'){//We pressed 'I'
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
 			mapTiles[i].y -= scl * scrollAmount;//Move tile up 1 space
@@ -753,9 +766,8 @@ function tileGroup(button){//mess with tiles in square group
 	tileGroupDeleting = false;//no longer deleting
 }//placeTile() END
 
-function tileGroupPaste(button){//mess with tiles in square group
+function tileGroupCutCopy(button){//mess with tiles in square group
 	var X1, X2, Y1, Y2;//define XY positions
-	var XLines, YLines;//define number of XY lines
 	var tileCount = 0;
 	
 	if(sx1 < sx2){//if x1 is less than x2
@@ -774,11 +786,11 @@ function tileGroupPaste(button){//mess with tiles in square group
 		Y1 = Math.floor(sy2 / scl) * scl;//Adjust XY To Be On Tile Border
 	}
 	
-	XLines = (X2 - X1) / scl;//how many x lines
-	YLines = (Y2 - Y1) / scl;//how many y lines
+	tileGroupXLines = (X2 - X1) / scl;//how many x lines
+	tileGroupYLines = (Y2 - Y1) / scl;//how many y lines
 	
-	for(var i = 0; i < YLines; i++){//loop through all y lines
-		for(var j = 0; j < XLines; j++){//loop through all x lines
+	for(var i = 0; i < tileGroupYLines; i++){//loop through all y lines
+		for(var j = 0; j < tileGroupXLines; j++){//loop through all x lines
 			if(button == 'x'){//we clicked middle button on a tile
 				//tileCount = 0;
 				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
@@ -797,22 +809,50 @@ function tileGroupPaste(button){//mess with tiles in square group
 						tileCount++;
 					}
 				}
-			}else if(button == 'v'){//we clicked middle button
-				//for(var k = 0; k <= mapTilesCopy.length-1; k++){//loop through all tiles
-				if(tileCount < mapTilesCopy.length){
-					mapTiles[mapTiles.length] = new mTile(0, 0, mapTilesCopy[tileCount].image, mapTilesCopy[tileCount].r, mapTilesCopy[tileCount].g, mapTilesCopy[tileCount].b, mapTilesCopy[tileCount].clear);
-					mapTiles[mapTiles.length - 1].x = X1 + (scl * j);
-					mapTiles[mapTiles.length - 1].y = Y1 + (scl * i);
-					//tileCount++;
-					if(tileCount++ == mapTilesCopy.length){
-						//console.log('done');
-						return;
-					}
-				}
 			}
 		}
 	}
 	tileGroupStep = 0;//reset step count
+}//tileGroupCutCopy() END
+
+function drawGroupPasteOutline(){
+	var X1,X2,Y1,Y2;//Setup Variables
+	
+	X1 = Math.floor((mouseX - (Math.floor(tileGroupXLines / 2) * scl)) / scl) * scl;
+	X2 = Math.floor((mouseX + (Math.ceil(tileGroupXLines / 2) * scl)) / scl) * scl;
+	Y1 = Math.floor((mouseY - (Math.floor(tileGroupYLines / 2) * scl)) / scl) * scl;
+	Y2 = Math.floor((mouseY + (Math.ceil(tileGroupYLines / 2) * scl)) / scl) * scl;
+	
+	strokeWeight(borderThickness); // Thicker
+	stroke(255,0,0);//RED
+	line(X1, Y1, X1, Y2);//Draw Left
+	line(X2, Y1, X2, Y2);//Draw Right
+	line(X1, Y1, X2, Y1);//Draw Top
+	line(X1, Y2, X2, Y2);//Draw Bottom
+	strokeWeight(1); // Default
+	stroke(0);//BLACK
+}//drawGroupPasteOutline() END
+
+function tileGroupPaste(){
+	var X1,Y1;//Setup Variables
+	var tileCount = 0;
+	
+	X1 = Math.floor((mouseX - (Math.floor(tileGroupXLines / 2) * scl)) / scl) * scl;
+	Y1 = Math.floor((mouseY - (Math.floor(tileGroupYLines / 2) * scl)) / scl) * scl;
+	
+	for(var i = 0; i < tileGroupYLines; i++){//loop through all y lines
+		for(var j = 0; j < tileGroupXLines; j++){//loop through all x lines
+			if(tileCount < mapTilesCopy.length){
+				mapTiles[mapTiles.length] = new mTile(0, 0, mapTilesCopy[tileCount].image, mapTilesCopy[tileCount].r, mapTilesCopy[tileCount].g, mapTilesCopy[tileCount].b, mapTilesCopy[tileCount].clear);
+				mapTiles[mapTiles.length - 1].x = X1 + (scl * j);
+				mapTiles[mapTiles.length - 1].y = Y1 + (scl * i);
+				if(tileCount++ == mapTilesCopy.length){
+					//console.log('done');
+					return;
+				}
+			}
+		}
+	}
 }//tileGroupPaste() END
 
 function deleteTile(tile){//Delete a tile and update the array
