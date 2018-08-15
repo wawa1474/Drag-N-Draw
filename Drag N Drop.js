@@ -474,7 +474,7 @@ function keyTyped(){//We typed a key
 		SY = window.pageYOffset + (scl * scrollAmount);//Scroll Screen RIGHT
 	}else if(key == 'd'){//We pressed 'D'
 		SX = window.pageXOffset + (scl * scrollAmount);//Scroll Screen DOWN
-	}else if(key == 'c'){//We pressed 'C'
+	}else if(key == 'f'){//We pressed 'F'
 		if(CClear){//Is it currently clear?
 			CClear = false;//Set if not clear
 			CCheckBox.checked(false);//Uncheck the checkbox
@@ -482,18 +482,19 @@ function keyTyped(){//We typed a key
 			CClear = true;//Set it clear
 			CCheckBox.checked(true);//Check the checkbox
 		}
-	}else if(key == 'z'){//We pressed 'Z'
-		prevRowC();//Previous Tile row
 	}else if(key == 'x'){//We pressed 'X'
-		nextRowC();//Next Tile Row
-	}/*else if(key == 'f'){//We pressed 'F'
-		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-			if(isCursorOnTile(i)){//Are we clicking on the tile
-				loadTile(i);//Load tileN with whatever tile we just checked
-				updateTileRow();//Get the row to whatever tile we're on
-			}
+		if(tileGroupStep == 2){
+			//cut group selection
 		}
-	}*/else if(key == 'i'){//We pressed 'I'
+	}else if(key == 'c'){//We pressed 'C'
+		if(tileGroupStep == 2){
+			//copy group selection
+		}
+	}else if(key == 'v'){//We pressed 'V'
+		if(tileGroupStep == 2){
+			//paste group selection
+		}
+	}else if(key == 'i'){//We pressed 'I'
 		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
 			mapTiles[i].y -= scl * scrollAmount;//Move tile up 1 space
 		}
