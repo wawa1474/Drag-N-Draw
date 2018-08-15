@@ -780,7 +780,7 @@ function tileGroupPaste(button){//mess with tiles in square group
 	for(var i = 0; i < YLines; i++){//loop through all y lines
 		for(var j = 0; j < XLines; j++){//loop through all x lines
 			if(button == 'x'){//we clicked middle button on a tile
-				tileCount = 0;
+				//tileCount = 0;
 				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
 					if(isCursorOnTileXY(k, (X1 + (scl * j)) + 4, (Y1 + (scl * i)) + 4)){//Are we clicking on the tile
 						mapTilesCopy[tileCount] = mapTiles[k];
@@ -790,7 +790,7 @@ function tileGroupPaste(button){//mess with tiles in square group
 					}
 				}
 			}else if(button == 'c'){//we clicked right button
-				tileCount = 0;
+				//tileCount = 0;
 				for(var k = 0; k <= mapTiles.length-1; k++){//loop through all tiles
 					if(isCursorOnTileXY(k, (X1 + (scl * j)) + 4, (Y1 + (scl * i)) + 4)){//Are we clicking on the tile
 						mapTilesCopy[tileCount] = mapTiles[k];
@@ -798,8 +798,16 @@ function tileGroupPaste(button){//mess with tiles in square group
 					}
 				}
 			}else if(button == 'v'){//we clicked middle button
-				for(var k = 0; k <= mapTilesCopy.length-1; k++){//loop through all tiles
-					mapTiles[mapTiles.length] = mapTilesCopy[k];
+				//for(var k = 0; k <= mapTilesCopy.length-1; k++){//loop through all tiles
+				if(tileCount < mapTilesCopy.length){
+					mapTiles[mapTiles.length] = new mTile(0, 0, mapTilesCopy[tileCount].image, mapTilesCopy[tileCount].r, mapTilesCopy[tileCount].g, mapTilesCopy[tileCount].b, mapTilesCopy[tileCount].clear);
+					mapTiles[mapTiles.length - 1].x = X1 + (scl * j);
+					mapTiles[mapTiles.length - 1].y = Y1 + (scl * i);
+					//tileCount++;
+					if(tileCount++ == mapTilesCopy.length){
+						//console.log('done');
+						return;
+					}
 				}
 			}
 		}
