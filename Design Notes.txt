@@ -42,10 +42,19 @@ Welcome to the Drag-N-Draw wiki!
 ### QE:
 	\-Change Selected Tile
 
-### ZX/Space-Shift:
+### Space-Shift:
 	\-Change Tile Row
 
+### X:
+	\-Cut Group Selection
+
 ### C:
+	\-Copy Group Selection
+
+### V:
+	\-Paste Group Selection
+
+### F:
 	\-Toggle Tile Clear
 
 ### R:
