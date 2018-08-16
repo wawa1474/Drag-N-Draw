@@ -171,8 +171,8 @@ function FileSaveMap(){//Save the Map to file
 	var newRow;
 	for(var i = 0; i < mapTiles.length - 1; i++){//loop through all tiles
 		newRow = mapTable.addRow();//Add a row to table
-		newRow.set('x',mapTiles[i].x);//Tile X position
-		newRow.set('y',mapTiles[i].y);//Tile Y position
+		newRow.set('x',Math.floor(mapTiles[i].x / 16));//Tile X position
+		newRow.set('y',Math.floor(mapTiles[i].y / 16));//Tile Y position
 		newRow.set('image',mapTiles[i].image);//Tile Image
 		newRow.set('r',mapTiles[i].r);//Tile Red amount
 		newRow.set('g',mapTiles[i].g);//Tile Green amount
@@ -200,8 +200,8 @@ function FileLoadMap2(table){//Load the Map from file
 		if(mapTable.get(i,'clear') == 0){//Is Tile Clear
 			CLEAR = false;//tile is not clear
 		}
-		mapTiles[i] = new mTile(int(mapTable.get(i,'x')),//Tile X position
-												  int(mapTable.get(i,'y')),//Tile Y position
+		mapTiles[i] = new mTile(int(mapTable.get(i,'x')) * 16,//Tile X position
+												  int(mapTable.get(i,'y')) * 16,//Tile Y position
 												  int(mapTable.get(i,'image')),//Tile Image
 												  int(mapTable.get(i,'r')),//Tile Red amount
 												  int(mapTable.get(i,'g')),//Tile Green amount
@@ -971,13 +971,13 @@ function tileUI(){//The tile UI
 	
 	this.setup = function(){//Setup the UI
 		//Color Slider Inputs
-		RSlider = createSlider(0,255,127);//(Min, Max, Start)
+		RSlider = createSlider(0,256,128, 16);//(Min, Max, Start)
 		RSlider.changed(function RSliderC() {RInput.value(this.value());});//The function to run when changed
 		RSlider.style('width', scl*2.8+'px');//Width of slider
-		GSlider = createSlider(0,255,127);//(Min, Max, Start)
+		GSlider = createSlider(0,256,128, 16);//(Min, Max, Start)
 		GSlider.changed(function GSliderC() {GInput.value(this.value());});//The function to run when changed
 		GSlider.style('width', scl*2.8+'px');//Width of slider
-		BSlider = createSlider(0,255,127);//(Min, Max, Start)
+		BSlider = createSlider(0,256,128, 16);//(Min, Max, Start)
 		BSlider.changed(function BSliderC() {BInput.value(this.value());});//The function to run when changed
 		BSlider.style('width', scl*2.8+'px');//Width of slider
 		
