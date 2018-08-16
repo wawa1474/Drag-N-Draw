@@ -222,7 +222,7 @@ function FileLoadMap2(table){//Load the Map from file
 	//int(mapTable.get(0,'clear'));//blank
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////FILE METADATA
 	
-	if(fileVersion == 0){
+	if(fileVersion == 0){//whats the file version
 		for(var i = 1; i < mapTable.getRowCount(); i++){//Loop through all the rows
 			var CLEAR = true;//tile is clear
 			if(mapTable.get(i,'clear') == 0){//Is Tile Clear
@@ -237,8 +237,8 @@ function FileLoadMap2(table){//Load the Map from file
 															CLEAR);//,//Is Tile Clear
 															//mapTable.get(i,'lore'));//Tile LORE?
 		}
-	}else{
-		console.log("File Version Error.");
+	}else{//we don't know that file version
+		console.log("File Version Error.");//throw error
 	}
 	
 	if(mapTiles == null){//Is the array null
@@ -318,6 +318,7 @@ function draw(){//Draw the canvas
 	
 	//player.update();
 	//player.draw();
+	
 	if(_DEBUG_ != 0){
 		operationDisplay();
 	}
@@ -490,7 +491,7 @@ function mouseWheel(event){//We Scrolled The Mouse Wheel
 }//mouseWheel(event) END
 
 function keyPressed(){//We pressed a key
-	if(noKeyboard == false){
+	if(noKeyboard == false){//are we blocking keyboard functions?
 		//console.log(keyCode);//What key did we press?
 		if (keyCode == /*SHIFT*/16){//We pressed shift
 			prevRowC();//Previous Tile row
@@ -514,7 +515,7 @@ function keyPressed(){//We pressed a key
 }
 
 function keyTyped(){//We typed a key
-	if(noKeyboard == false){
+	if(noKeyboard == false){//are we blocking keyboard functions?
 		if(key == 'q'){//We pressed 'Q'
 			prevTileC();
 		}else if(key == 'e'){//We pressed 'E'
@@ -1055,9 +1056,9 @@ function tileUI(){//The tile UI
 		PrevButton = createButton('Prev');//Text of button
 		PrevButton.mousePressed(prevRowC);//The function to run when pressed
 		
-		fileNameInput = createInput(fileName);
-		fileNameInput.mouseOver(function fileNameInputMOver(){noKeyboard = true;});
-		fileNameInput.mouseOut(function fileNameInputMOut(){noKeyboard = false;});
+		fileNameInput = createInput(fileName);//create the file name input
+		fileNameInput.mouseOver(function fileNameInputMOver(){noKeyboard = true;});//we're mousing over the file name input, block keyboard functions
+		fileNameInput.mouseOut(function fileNameInputMOut(){noKeyboard = false;});//we're not mousing over the file name input, allow keyboard functions
 		fileNameInput.style('width', scl*3.5+'px');//Width of input box
 		fileNameInput.input(function fileNameInputF(){fileName = this.value(); /* console.log(this.value()); */});
 		
