@@ -5,9 +5,13 @@
 var _DEBUG_ = 0;//what are we debugging
 var _DEBUGAMOUNT_ = 50000;//how many are we debugging
 
+var _FILEVERSION_ = 0;//File Version is 0
+
 var dragging = false; // Is the object being dragged?
 var deleting = false;//Are we deleting tiles?
 var noTile = false;//Are we blocking placement of tiles?
+
+var noKeyboard = false;//Are We Blocking keyTyped() and keyPressed()?
 
 var mapN = 0;//Which map peice are we messing with
 var totalImages = 39;//Total Images
@@ -147,7 +151,7 @@ function LoadCanvas(){//Load the canvas from local storage
 function FileSaveCanvas(){//Save the Canvas to a file
 	BG.draw();//Draw the background and grid
 	//Display Map Tiles
-	for(var i = 0; i < mapTiles.length; i++){//Go through all the tiles
+	for(var i = 1; i < mapTiles.length; i++){//Go through all the tiles
 		if(!mapTiles[i].clear){//Is the tile colored
 			fill(mapTiles[i].r,mapTiles[i].g,mapTiles[i].b);//Set Tile background color
 			rect(mapTiles[i].x,mapTiles[i].y,scl,scl);//Draw colored square behind tile
@@ -169,7 +173,19 @@ function FileSaveMap(){//Save the Map to file
 	mapTable.addColumn('clear');//Is Tile Clear
 	//mapTable.addColumn('lore');//Tile LORE?
 	var newRow;
-	for(var i = 0; i < mapTiles.length - 1; i++){//loop through all tiles
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////FILE METADATA
+	newRow = mapTable.addRow();//Add a row to table
+	newRow.set('x',_FILEVERSION_);//File Version
+	newRow.set('y',0);//blank
+	newRow.set('image',0);//blank
+	newRow.set('r',0);//blank
+	newRow.set('g',0);//blank
+	newRow.set('b',0);//blank
+	newRow.set('clear',0);//blank
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////FILE METADATA
+	
+	for(var i = 0; i <= mapTiles.length - 1; i++){//loop through all tiles
 		newRow = mapTable.addRow();//Add a row to table
 		newRow.set('x',Math.floor(mapTiles[i].x / scl));//Tile X position
 		newRow.set('y',Math.floor(mapTiles[i].y / scl));//Tile Y position
@@ -195,20 +211,36 @@ function FileLoadMap(){//load map from file
 function FileLoadMap2(table){//Load the Map from file
 	mapTable = table;//loadTable(fileName + '.csv', 'csv', 'header');//Load the csv
 	mapTiles = [];//Clear the array
-	for(var i = 0; i < mapTable.getRowCount(); i++){//Loop through all the rows
-		var CLEAR = true;//tile is clear
-		if(mapTable.get(i,'clear') == 0){//Is Tile Clear
-			CLEAR = false;//tile is not clear
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////FILE METADATA
+	var fileVersion = int(mapTable.get(0,'x'));//File Version
+	//int(mapTable.get(0,'y'));//blank
+	//int(mapTable.get(0,'image'));//blank
+	//int(mapTable.get(0,'r'));//blank
+	//int(mapTable.get(0,'g'));//blank
+	//int(mapTable.get(0,'b'));//blank
+	//int(mapTable.get(0,'clear'));//blank
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////FILE METADATA
+	
+	if(fileVersion == 0){
+		for(var i = 1; i < mapTable.getRowCount(); i++){//Loop through all the rows
+			var CLEAR = true;//tile is clear
+			if(mapTable.get(i,'clear') == 0){//Is Tile Clear
+				CLEAR = false;//tile is not clear
+			}
+			mapTiles[i - 1] = new mTile(int(mapTable.get(i,'x')) * scl,//Tile X position
+															int(mapTable.get(i,'y')) * scl,//Tile Y position
+															int(mapTable.get(i,'image')),//Tile Image
+															int(mapTable.get(i,'r')) * scl,//Tile Red amount
+															int(mapTable.get(i,'g')) * scl,//Tile Green amount
+															int(mapTable.get(i,'b')) * scl,//Tile Blue amount
+															CLEAR);//,//Is Tile Clear
+															//mapTable.get(i,'lore'));//Tile LORE?
 		}
-		mapTiles[i] = new mTile(int(mapTable.get(i,'x')) * scl,//Tile X position
-												  int(mapTable.get(i,'y')) * scl,//Tile Y position
-												  int(mapTable.get(i,'image')),//Tile Image
-												  int(mapTable.get(i,'r')) * scl,//Tile Red amount
-												  int(mapTable.get(i,'g')) * scl,//Tile Green amount
-												  int(mapTable.get(i,'b')) * scl,//Tile Blue amount
-												  CLEAR);//,//Is Tile Clear
-												  //mapTable.get(i,'lore'));//Tile LORE?
+	}else{
+		console.log("File Version Error.");
 	}
+	
 	if(mapTiles == null){//Is the array null
 		mapTiles = [];//Reset the map array
 	}
@@ -458,94 +490,98 @@ function mouseWheel(event){//We Scrolled The Mouse Wheel
 }//mouseWheel(event) END
 
 function keyPressed(){//We pressed a key
-	//console.log(keyCode);//What key did we press?
-	if (keyCode == /*SHIFT*/16){//We pressed shift
-		prevRowC();//Previous Tile row
-	}else if (keyCode == /*SPACE*/32){//We pressed space
-		nextRowC();//Next Tile Row
-		return false;//Block normal action
-	}/*else if (keyCode == 40){//We pressed down
-		player.move('DOWN');//Move Player Down
-		return false;//Block normal action
-	}else if (keyCode == 38){//We pressed up
-		player.move('UP');//Move Player Up
-		return false;//Block normal action
-	}else if (keyCode == 37){//We pressed left
-		player.move('LEFT');//Move Player Left
-		return false;//Block normal action
-	}else if (keyCode == 39){//We pressed right
-		player.move('RIGHT');//Move Player Right
-		return false;//Block normal action
-	}*/
+	if(noKeyboard == false){
+		//console.log(keyCode);//What key did we press?
+		if (keyCode == /*SHIFT*/16){//We pressed shift
+			prevRowC();//Previous Tile row
+		}else if (keyCode == /*SPACE*/32){//We pressed space
+			nextRowC();//Next Tile Row
+			return false;//Block normal action
+		}/*else if (keyCode == 40){//We pressed down
+			player.move('DOWN');//Move Player Down
+			return false;//Block normal action
+		}else if (keyCode == 38){//We pressed up
+			player.move('UP');//Move Player Up
+			return false;//Block normal action
+		}else if (keyCode == 37){//We pressed left
+			player.move('LEFT');//Move Player Left
+			return false;//Block normal action
+		}else if (keyCode == 39){//We pressed right
+			player.move('RIGHT');//Move Player Right
+			return false;//Block normal action
+		}*/
+	}
 }
 
 function keyTyped(){//We typed a key
-	if(key == 'q'){//We pressed 'Q'
-		prevTileC();
-	}else if(key == 'e'){//We pressed 'E'
-		nextTileC();
-	}else if(key == 'w'){//We pressed 'W'
-		SY = window.pageYOffset - (scl * scrollAmount);//Scroll Screen UP
-	}else if(key == 'a'){//We pressed 'A'
-		SX = window.pageXOffset - (scl * scrollAmount);//Scroll Screen LEFT
-	}else if(key == 's'){//We pressed 'S'
-		SY = window.pageYOffset + (scl * scrollAmount);//Scroll Screen RIGHT
-	}else if(key == 'd'){//We pressed 'D'
-		SX = window.pageXOffset + (scl * scrollAmount);//Scroll Screen DOWN
-	}else if(key == 'f'){//We pressed 'F'
-		if(CClear){//Is it currently clear?
-			CClear = false;//Set if not clear
-			CCheckBox.checked(false);//Uncheck the checkbox
-		}else{//Its not clear
-			CClear = true;//Set it clear
-			CCheckBox.checked(true);//Check the checkbox
-		}
-	}else if(key == 'x'){//We pressed 'X'
-		if(tileGroupStep == 2){//we're on step two of group selection
-			tileGroupCutCopy('x');//cut group selection
-		}
-	}else if(key == 'c'){//We pressed 'C'
-		if(tileGroupStep == 2){//we're on step two of group selection
-			tileGroupCutCopy('c');//copy group selection
-		}
-	}else if(key == 'v'){//We pressed 'V'
-		tileGroupStep = 3;//paste step is 3
-	}else if(key == 'i'){//We pressed 'I'
-		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-			mapTiles[i].y -= scl * scrollAmount;//Move tile up 1 space
-		}
-	}else if(key == 'j'){//We pressed 'J'
-		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-			mapTiles[i].x -= scl * scrollAmount;//Move tile left 1 space
-		}
-	}else if(key == 'k'){//We pressed 'K'
-		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-			mapTiles[i].y += scl * scrollAmount;//Move tile down 1 space
-		}
-	}else if(key == 'l'){//We pressed 'L'
-		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-			mapTiles[i].x += scl * scrollAmount;//Move tile right 1 space
-		}
-	}else if(key == 'r'){//We pressed 'R'
-		for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
-			if(isCursorOnTile(i)){//Are we clicking on the tile
-				console.log('Tile #: ' + i + ', X Position: ' + mapTiles[i].x + ', Y Position: ' + mapTiles[i].y + ', Red Amount: ' + mapTiles[i].r + ', Green Amount: ' + mapTiles[i].g + ', Blue Amount: ' + mapTiles[i].b + ', Tile Image #: ' + mapTiles[i].image + ', Is Tile Clear: ' + mapTiles[i].clear + ', Tile Lore: ' + mapTiles[i].lore);
-				//console.log('Tile #: ' + i + ', X Position: ' + mapTiles[i].x + ', Y Position: ' + mapTiles[i].y);
-				//console.log('Red Amount: ' + mapTiles[i].r + ', Green Amount: ' + mapTiles[i].g + ', Blue Amount: ' + mapTiles[i].b);
-				//console.log('Tile Image #: ' + mapTiles[i].image + ', Is Tile Clear: ' + mapTiles[i].clear);
-				//console.log('Tile Lore: ' + mapTiles[i].lore);
+	if(noKeyboard == false){
+		if(key == 'q'){//We pressed 'Q'
+			prevTileC();
+		}else if(key == 'e'){//We pressed 'E'
+			nextTileC();
+		}else if(key == 'w'){//We pressed 'W'
+			SY = window.pageYOffset - (scl * scrollAmount);//Scroll Screen UP
+		}else if(key == 'a'){//We pressed 'A'
+			SX = window.pageXOffset - (scl * scrollAmount);//Scroll Screen LEFT
+		}else if(key == 's'){//We pressed 'S'
+			SY = window.pageYOffset + (scl * scrollAmount);//Scroll Screen RIGHT
+		}else if(key == 'd'){//We pressed 'D'
+			SX = window.pageXOffset + (scl * scrollAmount);//Scroll Screen DOWN
+		}else if(key == 'f'){//We pressed 'F'
+			if(CClear){//Is it currently clear?
+				CClear = false;//Set if not clear
+				CCheckBox.checked(false);//Uncheck the checkbox
+			}else{//Its not clear
+				CClear = true;//Set it clear
+				CCheckBox.checked(true);//Check the checkbox
 			}
-		}
-	}else if(key == 'p'){//We pressed 'P'
-		//tileGroup(scl * 10, scl * 3, scl * 5, scl * 10)
-		if(tileGroupStep == 0){//set XY1
-			tileGroupStep = 1;//ready for next step
-			sx1 = mouseX;//set x1 to mouse x position
-			sy1 = mouseY;//set y1 to mouse y position
-		}else if (tileGroupStep == 1){//set XY2
-			tileGroupStep = 2;//ready to do group tiles stuff
-			sx2 = mouseX;//set x1 to mouse x position
-			sy2 = mouseY;//set y2 to mouse y position
+		}else if(key == 'x'){//We pressed 'X'
+			if(tileGroupStep == 2){//we're on step two of group selection
+				tileGroupCutCopy('x');//cut group selection
+			}
+		}else if(key == 'c'){//We pressed 'C'
+			if(tileGroupStep == 2){//we're on step two of group selection
+				tileGroupCutCopy('c');//copy group selection
+			}
+		}else if(key == 'v'){//We pressed 'V'
+			tileGroupStep = 3;//paste step is 3
+		}else if(key == 'i'){//We pressed 'I'
+			for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+				mapTiles[i].y -= scl * scrollAmount;//Move tile up 1 space
+			}
+		}else if(key == 'j'){//We pressed 'J'
+			for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+				mapTiles[i].x -= scl * scrollAmount;//Move tile left 1 space
+			}
+		}else if(key == 'k'){//We pressed 'K'
+			for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+				mapTiles[i].y += scl * scrollAmount;//Move tile down 1 space
+			}
+		}else if(key == 'l'){//We pressed 'L'
+			for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+				mapTiles[i].x += scl * scrollAmount;//Move tile right 1 space
+			}
+		}else if(key == 'r'){//We pressed 'R'
+			for(var i = mapTiles.length-1; i >= 0; i--){//Go through all the tiles
+				if(isCursorOnTile(i)){//Are we clicking on the tile
+					console.log('Tile #: ' + i + ', X Position: ' + mapTiles[i].x + ', Y Position: ' + mapTiles[i].y + ', Red Amount: ' + mapTiles[i].r + ', Green Amount: ' + mapTiles[i].g + ', Blue Amount: ' + mapTiles[i].b + ', Tile Image #: ' + mapTiles[i].image + ', Is Tile Clear: ' + mapTiles[i].clear + ', Tile Lore: ' + mapTiles[i].lore);
+					//console.log('Tile #: ' + i + ', X Position: ' + mapTiles[i].x + ', Y Position: ' + mapTiles[i].y);
+					//console.log('Red Amount: ' + mapTiles[i].r + ', Green Amount: ' + mapTiles[i].g + ', Blue Amount: ' + mapTiles[i].b);
+					//console.log('Tile Image #: ' + mapTiles[i].image + ', Is Tile Clear: ' + mapTiles[i].clear);
+					//console.log('Tile Lore: ' + mapTiles[i].lore);
+				}
+			}
+		}else if(key == 'p'){//We pressed 'P'
+			//tileGroup(scl * 10, scl * 3, scl * 5, scl * 10)
+			if(tileGroupStep == 0){//set XY1
+				tileGroupStep = 1;//ready for next step
+				sx1 = mouseX;//set x1 to mouse x position
+				sy1 = mouseY;//set y1 to mouse y position
+			}else if (tileGroupStep == 1){//set XY2
+				tileGroupStep = 2;//ready to do group tiles stuff
+				sx2 = mouseX;//set x1 to mouse x position
+				sy2 = mouseY;//set y2 to mouse y position
+			}
 		}
 	}
 }//keyTyped() END
@@ -1020,6 +1056,8 @@ function tileUI(){//The tile UI
 		PrevButton.mousePressed(prevRowC);//The function to run when pressed
 		
 		fileNameInput = createInput(fileName);
+		fileNameInput.mouseOver(function fileNameInputMOver(){noKeyboard = true;});
+		fileNameInput.mouseOut(function fileNameInputMOut(){noKeyboard = false;});
 		fileNameInput.style('width', scl*3.5+'px');//Width of input box
 		fileNameInput.input(function fileNameInputF(){fileName = this.value(); /* console.log(this.value()); */});
 		
