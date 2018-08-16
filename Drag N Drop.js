@@ -171,12 +171,12 @@ function FileSaveMap(){//Save the Map to file
 	var newRow;
 	for(var i = 0; i < mapTiles.length - 1; i++){//loop through all tiles
 		newRow = mapTable.addRow();//Add a row to table
-		newRow.set('x',Math.floor(mapTiles[i].x / 16));//Tile X position
-		newRow.set('y',Math.floor(mapTiles[i].y / 16));//Tile Y position
+		newRow.set('x',Math.floor(mapTiles[i].x / scl));//Tile X position
+		newRow.set('y',Math.floor(mapTiles[i].y / scl));//Tile Y position
 		newRow.set('image',mapTiles[i].image);//Tile Image
-		newRow.set('r',mapTiles[i].r);//Tile Red amount
-		newRow.set('g',mapTiles[i].g);//Tile Green amount
-		newRow.set('b',mapTiles[i].b);//Tile Blue amount
+		newRow.set('r',Math.floor(mapTiles[i].r / scl));//Tile Red amount
+		newRow.set('g',Math.floor(mapTiles[i].g / scl));//Tile Green amount
+		newRow.set('b',Math.floor(mapTiles[i].b / scl));//Tile Blue amount
 		var CLEAR = 1;//tile is clear
 		if(!mapTiles[i].clear){//Is Tile Clear
 			CLEAR = 0;//tile is not clear
@@ -200,12 +200,12 @@ function FileLoadMap2(table){//Load the Map from file
 		if(mapTable.get(i,'clear') == 0){//Is Tile Clear
 			CLEAR = false;//tile is not clear
 		}
-		mapTiles[i] = new mTile(int(mapTable.get(i,'x')) * 16,//Tile X position
-												  int(mapTable.get(i,'y')) * 16,//Tile Y position
+		mapTiles[i] = new mTile(int(mapTable.get(i,'x')) * scl,//Tile X position
+												  int(mapTable.get(i,'y')) * scl,//Tile Y position
 												  int(mapTable.get(i,'image')),//Tile Image
-												  int(mapTable.get(i,'r')),//Tile Red amount
-												  int(mapTable.get(i,'g')),//Tile Green amount
-												  int(mapTable.get(i,'b')),//Tile Blue amount
+												  int(mapTable.get(i,'r')) * scl,//Tile Red amount
+												  int(mapTable.get(i,'g')) * scl,//Tile Green amount
+												  int(mapTable.get(i,'b')) * scl,//Tile Blue amount
 												  CLEAR);//,//Is Tile Clear
 												  //mapTable.get(i,'lore'));//Tile LORE?
 	}
